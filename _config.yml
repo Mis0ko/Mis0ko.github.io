@@ -285,7 +285,7 @@ defaults:
       date_format: "%d-%m-%Y"
       provider: "disqus"
       disqus:
-        shortname: "Misoko"
+        shortname: "disqus_NHlBvHaMGd"
 
   # _pages
   - scope:
