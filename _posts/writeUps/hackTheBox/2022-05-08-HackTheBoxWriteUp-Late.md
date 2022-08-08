@@ -47,7 +47,7 @@ d'en extraire le texte présent dessus.
 Après quelques recherches, on tombe sur ce blog nous indiquant quelques tests à faire dans le cas 
 d'un SSTI (server side template injection, ou injection de template côté serveur) : [blog SSTI](https://www.cobalt.io/blog/a-pentesters-guide-to-server-side-template-injection-ssti)
 
-Après avoir lu les explications, et en regardant la cheatlist fournie, on voit en prenant une image de {{7x7}} que 
+Après avoir lu les explications, et en regardant la cheatlist fournie, on voit en prenant une image de 7x7 que 
 le résultat de la convertion d'image en texte nous renvoie ***<p>49</p>***   
 
 On est dans le cas d'un serveur Flask/Jinja2.   

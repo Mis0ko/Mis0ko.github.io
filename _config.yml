@@ -14,7 +14,7 @@
 # theme                  : "minimal-mistakes-jekyll"
 #remote_theme           : "mmistakes/minimal-mistakes"
 remote_theme: "mmistakes/minimal-mistakes@4.24.0"
-minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin    : "dark" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 
 # Site Settings
@@ -23,7 +23,7 @@ title                    : "Misoko Blog"
 title_separator          : "-"
 subtitle                 : #"version 1.0" # site tagline that appears below site title in masthead
 name                     : "Michael Hofmann"
-description              : "Ce blog m'offre un endroit pour poster et expliquer certains sujets, concepts, systèmes et outils que je trouve intéressants. Il sert également d'emplacement que j'utilise pour mes ressources personnelles et pour discuter des outils que je développe."
+description              : "Ce blog me permet de prendre mes notes le long de mon apprentissage sur l'exploitation binaire ainsi que des ctfs auxquelles je participe."
 url                      : "https://mis0ko.github.io/" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "/" # the subpath of your site, e.g. "/blog"
 repository               : "Mis0ko/misoko.github.com" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
@@ -108,7 +108,7 @@ analytics:
 author:
   name             : "Michael Hofmann"
   avatar           : "/assets/images/logoAllMight.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Etudiant en école d'ingénieur avec un intérêt pour la sécurité informatique"
+  bio              : "Néophyte de sécurité informatique"
   location         : "Somewhere"
   email            :
   links:
