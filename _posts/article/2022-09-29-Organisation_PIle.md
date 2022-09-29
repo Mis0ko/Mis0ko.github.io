@@ -1,54 +1,35 @@
 ---
-title:  "1.Assembleur"
-date:   2022-05-07
+title:  "Organisation Pile / convention d'appels de fonction"
+date:   2022-09-29
 category: article
 ---
-# Assembleur
-Dans cet article, nous pouvons voir les bases de l'assembleur, ou du moins ce que je considère comme étant le plus utile à retenir.
+## Specifications
+Il est important de notifier que les informations suivantes sont basés sur l'ABI (Application Binary interface) System-v x86-64.
+L'interface binaire d'application System V est un ensemble de spécifications qui détaillent les conventions d'appel, les formats de fichier objet, les formats de fichier exécutable etc.
+
+C'est aujourd'hui l'ABI standard utilisé par les principaux systèmes d'exploitation Unix tels que Linux, les systèmes BSD et bien d'autres. Le format exécutable et lisible (ELF) fait partie de l'ABI System V.  
 ## Registre
-Un registre de processeur est l'un des plus petits emplacements de stockage de données du processeur.
-On l'utilise principalement pour stocker une instruction, une adresse de stockage ou toute autre donnée (une séquence de bits ou des caractères individuels, par exemple).  
+Dans le cas de l'ABI standard, les registres principaux suivants sont utilisés comme tel:
+
 ``` 
 rbp: Base Pointer. Il pointe sur le bas de la frame courante   
 de la pile.  
 rsp: Stack Pointer. Il pointe sur le haut de la frame courante  
-de la pile.  rip : Instruction Pointer. Il point sur l'instruc-  
-tion qui va être exécutée.
+de la pile.
+rip: Instruction Pointer. Il pointe sur l'instruction qui va être exécutée.
+rax: valeur de retour d'une fonction
+rdi: 1er argument de fonction
+rsi: 2eme argument de fonction
+rdx: 3eme argument de fonction
+rcx: 4eme argument de fonction
+```  
+Les registres vont être utilisés de diverses manières : variables locales, paramètres, etc.
+Durant les appels de fonctions, il y a de la concurrence pour l'utilisation des registres (entre fonction appelante
+et fonction appelée). Pour gérer cette concurrence, nous allons utiliser la pile afin de sauvegarder les registres dans une fonction
+afin de pouvoir s'en servir dans une autre, puis les restaurer lorque nous avons fini de nous en servir.
 
-On retrouve également d'autres registres.
-Ces registres peuvent être utilisés pour toutes actions moins  
-spécifiques.  
-rax:  
-rbx:  
-rcx:  
-rdx:  
-rsi:  
-rdi:  
-r8:  
-r9:  
-r10:  
-r11:  
-r12:  
-r13:  
-r14:  
-r15:
-```  
-Sous linux (x64), les arguments d'une fonction sont passés par  
-des registres. Les premiers args sont passés par ces registres :  
-```
-rdi:    Premier Argument
-rsi:    Second Argument
-rdx:    Troisième Argument
-rcx:    Quatrième Argument
-r8:     Cinquième Argument
-r9:     Sixième Argument
-```  
-Les registres ont des dérivés qui ont différentes tailles.
-Prenons le cas de eax.  
-En x64, il y a les registres rax, eax, ax et al. Le registre rax  
-pointe sur le début des 8 premiers bits. Le registre eax pointe sur  
-les quatre octets inférieurs du registre rax. Le registre ax correspond aux deux derniers octets du registre rax. Enfin, le registre 
-al est le dernier octet du registre rax.
+
+
 
 ## Words
 Un "Word" (mot) représente juste deux octets de données. Un dword correspond à quatre octets de données. Un qword est constitué de huit octets de données.  
