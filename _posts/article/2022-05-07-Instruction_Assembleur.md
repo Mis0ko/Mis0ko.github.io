@@ -1,5 +1,5 @@
 ---
-title:  "Instruction Assembleur"
+title:  "[0x1] Instruction Assembleur"
 date:   2022-05-07
 category: article
 ---
@@ -7,7 +7,7 @@ category: article
 Dans cet article, nous pouvons voir les bases de l'assembleur, ou du moins ce que je considère comme étant le plus utile à retenir.
 ## Registre
 Un registre de processeur est l'un des plus petits emplacements de stockage de données du processeur.
-On l'utilise principalement pour stocker une instruction, une adresse de stockage ou toute autre donnée (une séquence de bits ou des caractères individuels, par exemple).  
+On l'utilise principalement pour stocker une instruction, une adresse de stockage ou toute autre donnée (une séquence de bits ou des caractèr0x1es individuels, par exemple).  
 ``` 
 rbp: Base Pointer. Il pointe sur le bas de la frame courante   
 de la pile.  
