@@ -1,6 +1,6 @@
 ---
 title:  "Injection SQL"
-date:   2022-05-07
+date:   2022-10-16
 category: article
 ---
 Cette article a pour but de décrire le principe d'injection SQL et d'en énumérer une variété de manière non exaustive. 
