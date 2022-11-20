@@ -12,21 +12,35 @@ Niveau : Facile
 `sudo nmap 10.10.11.174 -Pn`
 
 ```
-Not shown: 989 filtered tcp ports (no-response)
-PORT     STATE SERVICE
-53/tcp   open  domain
-88/tcp   open  kerberos-sec
-135/tcp  open  msrpc
-139/tcp  open  netbios-ssn
-389/tcp  open  ldap
-445/tcp  open  microsoft-ds
-464/tcp  open  kpasswd5
-593/tcp  open  http-rpc-epmap
-636/tcp  open  ldapssl
-3268/tcp open  globalcatLDAP
-3269/tcp open  globalcatLDAPssl
+Nmap scan report for 10.10.11.174
+Host is up (0.022s latency).
+Not shown: 65515 filtered tcp ports (no-response)
+PORT      STATE SERVICE       VERSION
+53/tcp    open  domain        Simple DNS Plus
+88/tcp    open  kerberos-sec  Microsoft Windows Kerberos (server time: 2022-11-20 18:32:00Z)
+135/tcp   open  msrpc         Microsoft Windows RPC
+139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp   open  ldap          Microsoft Windows Active Directory LDAP (Domain: support.htb0., Site: Default-First-Site-Name)
+445/tcp   open  microsoft-ds?
+464/tcp   open  kpasswd5?
+593/tcp   open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  tcpwrapped
+3268/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: support.htb0., Site: Default-First-Site-Name)
+3269/tcp  open  tcpwrapped
+5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-server-header: Microsoft-HTTPAPI/2.0
+|_http-title: Not Found
+9389/tcp  open  mc-nmf        .NET Message Framing
+49664/tcp open  msrpc         Microsoft Windows RPC
+49667/tcp open  msrpc         Microsoft Windows RPC
+49674/tcp open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+49686/tcp open  msrpc         Microsoft Windows RPC
+49700/tcp open  msrpc         Microsoft Windows RPC
+52687/tcp open  msrpc         Microsoft Windows RPC
+52937/tcp open  msrpc         Microsoft Windows RPC
+Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows
 ```
-D'après les services offerts (port 88, 139, 389 et 445), on peut voir qu'il s'agit d'une machine windows.
+D'après les services disponibles (port 88, 139, 389 et 445), on peut voir qu'il s'agit d'une machine windows.
 
 ## 2 - SMB LDAP (port 445)
 On voit qu'il y a un service SMB, qui est un protocole client-serveur permettant d’accéder à des fichiers/dossiers ou autres ressources du réseaux comme les imprimantes, routeurs, etc.
@@ -59,36 +73,41 @@ smb: \> dir
     windirstat1_1_2_setup.exe              A    79171  Sat May 28 13:20:17 2022
     WiresharkPortable64_3.6.5.paf.exe      A 44398000  Sat May 28 13:19:43 2022
 ```
-Un fichier relève notre attention d'après son nom : UserInfo.exe.zip.
+Un fichier relève notre attention au vu de son nom : UserInfo.exe.zip.  
 On le récupère afin de l'analyser.
 `smb: \> get UserInfo.exe.zip`
 
 ## 3 - Analyse du fichier UserInfo.exe
 
-Après avoir dézipper le fichier, on essaye de désassembler l'exécutable à l'aide de ghidra.
-On voit qu'il s'agit d'un fichier dotnet, or il existe des outils plus adapter pour ce type de fichier,
+Après avoir dézipper le fichier, on essaye de désassembler l'exécutable à l'aide de ghidra.  
+On voit qu'il s'agit d'un fichier dotnet, or il existe des outils plus adaptés pour ce type de fichier,
 comme iLSpy sur linux accessible [ici](https://www.matbra.com/2020/06/18/install-avalonia-ilspy.html).
+
+
 <!-- 
 export PATH="$PATH:/home/misoko/.dotnet/tools"
 ilspycmd -p -o <folder> <dll file>
 -->
-Avec la commande :
-`ilspycmd -p -o <folder> <dll file>`
-`ilspycmd -p -o support support/UserInfo.exe`
+Avec la commande :  
+`ilspycmd -p -o <folder> <dll file>`  
+`ilspycmd -p -o support support/UserInfo.exe`  
+
 On peut récupérer le code source à l'origine de l'exécutable.
 
-Dans le fichier UserInfo.Services/LdapQuery.cs, on peut voir que les requêtes LDAP sont forgées en dures :
-<img src="/assets/images/WriteUps/HackTheBox/support/ldapQuery.png" width="1200px" height="600px"/>
+Dans le fichier UserInfo.Services/LdapQuery.cs, on peut voir que les requêtes LDAP sont forgées en dures :  
+<img src="/assets/images/WriteUps/HackTheBox/support/ldapQuery.png" width="800px" height="400px" style="display: block; margin: 0 auto"/>
 
 On a accès à l'identifiant de connection LDAP (support\ldap), et donc le protocole utilisé.
 
 On trouve également le fichier UserInfo.Services/Protected.cs, qui  contient le mot de passe ldap.
 Seulement celui-ci est obfusqué dans un algorithme :
-<img src="/assets/images/WriteUps/HackTheBox/support/passwordEncrypted.png" width="1200px" height="600px"/>
+<img src="/assets/images/WriteUps/HackTheBox/support/passwordEncrypted.png" width="1000px" height="500px" style="display: block; margin: 0 auto"/>
 
 Suite à cela, nous pouvons faire un script python afin de le désobfusquer : 
-<img src="/assets/images/WriteUps/HackTheBox/redPanda/passwordAlgo.png" width="1200px" height="600px"/>
-<img src="/assets/images/WriteUps/HackTheBox/redPanda/passwordDecrypted.png" width="1200px" height="600px"/>
+<img src="/assets/images/WriteUps/HackTheBox/support/passwordAlgo.png" width="800px" height="400px" style="display: block; margin: 0 auto"/>
+
+
+<img src="/assets/images/WriteUps/HackTheBox/support/passwordDecrypted.png" width="600px" height="300px" style="display: block; margin: 0 auto"/>
 
 ## 4 - Enumération LDAP
 On rappelle que LDAP est un protocole logiciel pour localiser des ressources (comme des fichiers) à travers des réseaux (inter ou intranet).
@@ -113,14 +132,13 @@ Après réflexion, nous pouvons voir que le port 5985 est ouvert, ce qui veut di
 de WinRM (windows remote management), un outil de gestion à distance d'un serveur Windows.
 Il permet aux admin systèmes de se connecter à distance aux serveurs windows.
 
-Un outil sous linux existe, intitulé "evil-winrm", permettant de se connecter.
+Un outil sous linux existe, "evil-winrm", est l'équivalant d'un winRM shell.
 ```
 sudo gem install evil-winrm
 evil-winrm -i 10.10.11.174 -u "support" -p 'Ironside47pleasure40Watchful'
 ```
-
-
-<img src="/assets/images/WriteUps/HackTheBox/redPanda/passwordMainController.png" width="1200px" height="600px"/>
+On accède au flag user :
+<img src="/assets/images/WriteUps/HackTheBox/support/userTxt.png" width="600px" height="300px" style="display: block; margin: 0 auto"/>
 
 
 ## Références
