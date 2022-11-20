@@ -3,9 +3,6 @@ title:  "HacktheBox WriteUp : Late"
 category: HackTheBox
 tag: writeups
 ---
-
-### Résumé
-
 Late est une machine pour débutants basée sur une plateforme Linux.  
 Niveau : Facile
 
