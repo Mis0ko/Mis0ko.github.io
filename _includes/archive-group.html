@@ -1,0 +1,17 @@
+
+{% include group-by-array collection=site.posts field="categories" %}
+{% for cat in group_names %}
+  {% if cat != "article" %}
+    {% assign posts = group_items[forloop.index0] %}
+    {% assign sorted_posts = posts | sort: "title" %}
+    <h3 id="{{ cat | slugify }}" class="archive__subtitle">{{ cat }}</h3>
+    <ul>
+      {% for post in sorted_posts %}
+        <li class="active"><a href="{{ post.url | url_escape }}">{{ post.title }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endfor %}
+
+
+

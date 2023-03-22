@@ -1,0 +1,7 @@
+{% assign root = site.github.repository_name %}
+{% if root == null %}
+  {% assign root = site.title | slugify %}
+{% endif %}
+{% assign base_url = "/" | append: root | append: "/" %}
+
+{{ base_url }}

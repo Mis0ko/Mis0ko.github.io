@@ -1,0 +1,37 @@
+---
+layout: archive
+permalink: /learningContent/
+author_profile: true
+title: ""
+tag: learning
+header:
+  image: /assets/images/header/3.png
+---
+{% assign excluded_tags = "writeups, test" | split: ", " %}
+
+<h1 style="border-bottom: 4px solid white;
+  display: inline; font-size:40px;">HackTheBox Academy</h1>
+  <p></p>
+
+{% assign sorted_tags = site.tags | sort %}
+{% for tag in sorted_tags %}
+  {% if excluded_tags contains tag[0] %}
+  {% else %}
+  <h1 style="border-bottom: 3px solid white;
+  display: inline;">{{ tag[0] }}</h1><p></p>
+      {% assign posts_for_tag = tag[1] %}
+      {% assign posts_for_tag_sorted = posts_for_tag | sort: 'categories' %}
+      {% assign categories_for_tag = posts_for_tag_sorted | map: 'categories' | join: ',' | split: ',' | uniq | sort %}
+      {% for category in categories_for_tag %}
+      <h4 style="border-bottom: 3px solid white;
+      display: inline;">{{ category }}</h4><p></p>
+        {% for post in posts_for_tag_sorted %}
+          {% if post.categories contains category %}
+            <p><a href="{{ post.url }}">{{ post.title }}</a></p>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+  {% endif %}
+{% endfor %}
+
+

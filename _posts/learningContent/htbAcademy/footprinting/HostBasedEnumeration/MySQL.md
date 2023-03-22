@@ -1,0 +1,45 @@
+# MySQl : port 3306
+
+MySQl est un système de gestion de base de données. MySql fonctionne sur un système de client-serveur. Les bases de données sont stockées dans les fichiers en .sql.
+
+## Configuration par défaut
+On peut retrouver le fichier de configuration dans le fichier **/etc/mysql/mysql.conf.d/mysqld.cnf**.
+```console
+Misoko@home[/home]$ cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep -v "#" | sed -r '/^\s*$/d'
+```
+
+## Énumération Nmap
+```console
+Misoko@home[/home]$ sudo nmap IP -sV -sC -p3306 --script mysql*
+```
+
+## Intéraction avec le serveur MySQL
+Les bases de données les plus importantes sont **sys (system schema)** et **information_schema**.
+On peut voir les raisons [ici](https://dev.mysql.com/doc/refman/8.0/en/system-schema.html#:~:text=The%20mysql%20schema%20is%20the,used%20for%20other%20operational%20purposes) pour plus de détails.
+- **sys** contient le schéma des tables, informations et metadata pour s'y connecter.
+- **information_schema** contient également des metadata, principalement récupéré de la **sys**.
+
+| Commandes                                          | Description                    |
+|----------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| mysql -u \<user> -p\<password> \<IP address>          | Connectez-vous au serveur MySQL. Il ne doit pas y avoir d'espace entre le drapeau '-p' et le mot de passe. |
+| show databases;                                    | Afficher toutes les bases de données.                                                                      |
+| use \<database>;                                    | Sélectionnez une des bases de données existantes.                                                          |
+| show tables;                                       | Afficher toutes les tables disponibles dans la base de données sélectionnée.                               |
+| show columns from \<table>;                         | Afficher toutes les colonnes de la base de données sélectionnée.                                           |
+| select * from \<table>;                             | Afficher tout dans la table souhaitée.                                                                     |
+| select * from \<table> where \<column> = "\<string>"; | Rechercher une chaîne de caractères dans la table souhaitée.                                               |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

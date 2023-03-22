@@ -1,0 +1,69 @@
+# MSSQL : port 1433
+
+MSSQL(Microsoft SQL) est un système de gestion de base de données développé par Microsoft et a été écrit pour être exécuté sur Windows. 
+Cependant il peut être utilisé sur Linux et MacOS. Il est très utilisé avec la technologie Microsoft .NET en raison de sa forte prise en charge native pour .NET.
+
+## Clients MSSQL
+
+SQL Server Management Studio (SSMS) est une fonctionnalité qui peut être installée avec le paquetage d'installation de MSSQL ou qui peut être téléchargée et installée séparément. Il est généralement installé sur le serveur pour la configuration initiale et la gestion à long terme des bases de données par les administrateurs. 
+
+Il faut garder en mémoire que MSSQL est une partie client de l'application et peut être installé sur tout système où l'admin / le développeur prévoit de gérer la base de données (et pas seulement sur le serveur où est installé la base de données).
+Donc si nous trouvons des crédentials / un système vulnérable avec SSMS, on pourrait accéder aux bases de données.
+
+D'autres clients existent pour lancer une BDD s'exécutant sur MSSQL :
+- mssql-cli 	
+- SQL Server PowerShell 	
+- HediSQL 	
+- SQLPro 	
+- mpacket's
+- script python [mssqlclient.py](https://github.com/fortra/impacket/blob/master/examples/mssqlclient.py)
+
+## MSSQL Bases de données 
+| BDD Système par défaut | Description  | 
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| master                  | Trace toutes les informations système d'une instance de serveur SQL.                                                                                                                                                                                                       |
+| model                   | Base de données modèle qui agit comme une structure pour chaque nouvelle base de données créée. Tout paramètre modifié dans la base de données modèle sera reflété dans toute nouvelle base de données créée après les modifications apportées à la base de données modèle |
+| msdb                    | L'agent SQL Server utilise cette base de données pour planifier les tâches et les alertes.                                                                                                                                                                                 |
+| tempdb                  | Stocke les objets temporaires                                                                                                                                                                                                                                              |
+| resource                | Base de données en lecture seule contenant les objets système inclus dans le serveur SQL.                                                                                                                                                                                  |
+
+## Configuration par défaut
+Par défaut, quand MSSQL est configuré pour avoir accès au réseau, le service SQL va surement s'exécuter en tant que **NTSERVICE\MSSQLSERVER**.
+Se connecter à partir du client est possible en utilisant **l'authentification Windows**, et par défaut le chiffrement n'est pas appliqué pour la connection.
+
+Se connecter en utilisant **l'authentification Windows** veut dire que l'OS traitera la demande de connection en utilisant la bdd du **SAM local** ou le **contrôleur de domaine** (qui héberge l'active Directory), avant d'autoriser la connexion au système de gestion de base de données.
+Utiliser le contrôleur de domaine est pratique en terme de gestion d'accès et d'audit d'activité dans un accès windows mais cela peut mener à des privesc / lateral mouvement.
+
+## Paramètres dangereux
+Liste de choses à inspecter qui peuvent proviter d'une mauvaise configuration de BDD MSSQL.
+- Les clients MSSQL n'utilisent pas le chiffrement pour se connecter au serveur MSSQL
+- L'utilisation de certificats auto-signés lorsque le chiffrement est utilisé. Il est possible d'usurper des certificats auto-signés.
+- L'utilisation de named pipes
+- Informations d'identification sa faibles et par défaut. Les administrateurs peuvent oublier de désactiver ce compte.
+
+## Énumération Nmap
+
+```console
+Misoko@htb[/htb]$ sudo nmap --script ms-sql-info,ms-sql-empty-password,ms-sql-xp-cmdshell,ms-sql-config,ms-sql-ntlm-info,ms-sql-tables,ms-sql-hasdbaccess,ms-sql-dac,ms-sql-dump-hashes --script-args mssql.instance-port=1433,mssql.username=sa,mssql.password=,mssql.instance-name=MSSQLSERVER -sV -p 1433 IP
+```
+
+## MSSQL Ping avec Metasploit
+Nous pouvons également utiliser Metasploit pour exécuter un scanner auxiliaire (mssql_ping) qui analysera le service MSSQL et fournira des informations utiles dans notre processus d'empreinte.
+```console
+msf6 auxiliary(scanner/mssql/mssql_ping) > set rhosts IP
+rhosts => IP
+msf6 auxiliary(scanner/mssql/mssql_ping) > run
+```
+
+## Connection avec mssqlclient.py 
+
+Si nous pouvons deviner ou avoir accès aux informations d'identification, cela nous permet de nous connecter à distance au serveur MSSQL et de commencer à interagir avec les bases de données à l'aide de T-SQL (Transact-SQL) grâce au script mssqlclient.py.
+
+L'authentification avec MSSQL nous permettra d'interagir directement avec les bases de données via le moteur de base de données SQL.
+
+```console
+Misoko@htb[/htb]$ python3 mssqlclient.py Administrator@10.129.201.248 -windows-auth
+...
+SQL> select name from sys.databases
+...
+```

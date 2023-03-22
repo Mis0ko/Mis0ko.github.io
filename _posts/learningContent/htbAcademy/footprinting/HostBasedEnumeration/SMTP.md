@@ -1,0 +1,64 @@
+# SMTP (Simple Main Transfer Protocol) : port 25 / 587 / 465
+
+SMTP est un protocole pour envoyer des emails dans un réseau IP.
+Il peut être utiliser entre un client-serveur SMTP ou entre 2 serveurs SMTP après authentification (utiliser de base comme client-serveur).
+Il est souvent utilisé avec les **protocoles IMAP ou POP3**, qui peuvent envoyer et recevoir des emails.
+
+Le **port 587** est utiliser pour authentifier des utilisateurs en utilisant la commande STARTTLS pour passer d'une connection plaintext à chiffrée.
+
+Le principe du protocole est simple. Le client se connecte au serveur, envoie l'adresse du destinataire du mail, suivi du contenu ainsi que des options. Une fois l'email envoyé, la connection est fermée.
+
+Par défaut, SMTP est un **protocole sans chiffrage**. Pour empêcher la lecture de données non-authorisée, une couche de chiffrelent SSL/TLS est appliquée.
+
+## Fonctionnement de l'empêchement de spam du serveur SMTP
+Il est nécessaire d'expliquer comment fonctionne l'intégralité du processus pour envoyer un mail, pour expliciter comment les serveurs SMTP bloquent le spam.
+
+- Après l'envoi du mail, le client SMTP **(Mail User Agent - MUA)** le convertit en un header et un body, et upload les 2 au server SMTP
+- Le serveur possède un logiciel **MTA (Mail Transfer Agent - Open Relay))**. Il check l'email pour la tail/spam et le stocke.
+- Pour aider le **MTA**, un **MSA (Submission Agent- Relay Serveur)** est parfois utiliser pour vérifier les emails.
+- Le MTA recherche les DNS pour l'IP du serveur mail du destinataire.
+- Quand les données arrivent au serveur SMTP du destinataire, les packets sont réassemblés pour former le mail. A partir de là, le **Mail delivery Agent (MDA)** transfère le mail à la boite mail du destinataire.
+**Client(MUA)** &rarr; **Submission Agent(MSA)** &rarr; **Open Realy (MTA)** &rarr; **Mail Delivery Agent (MDA)** &rarr; **MailBox(POP3/IMAP)**
+
+Deux problèmes inhérent au protocole:
+1. Pas de confirmation de réception fiable
+2. Les utilisateurs ne sont pas authentifié, donc l'émetteur d'un mail est n'est pas fiable (utilisation de spam de ce fait - mail spoofing).*
+
+*Il existe des mesures pour le deuxième point (voir DomainKeys(DKIM) et Sender Policy Framework (SPF)).*
+
+Dans le but d'empécher cela, une extension a été créé appelée **Extended SMTP (ESMTP)**, généralement utilisé quand on parle de SMTP.
+**ESMTP** utilise **TLS**, ce qui est fait après l'utilisation de la commande **EHLO** en envoyant des **STARTTLS**.
+
+# Connection / Utilisation SMTP
+
+Pour se connecter à un serveur SMTP, on peut utiliser **telnet** pour initialiser la connection TCP (faite par commande **HELO** et **EHLO**).
+
+| Command     | Description |
+| ----------- | ----------- |
+| telnet IP 25| Connection au serveur SMTP |
+| VRY utilisateur | vérifie si la boite mail de l'utilisateur existe dans l'host local |
+| nmap IP -p25 --script smtp-open-relay -v | identifie le serveur SMTP cible comme un relais ouvert en utilisant 16 tests différents.  |
+
+Une fois connecter au serveur, voir ce [lien](https://mailtrap.io/blog/smtp-commands-and-responses/) pour voir comment communiquer avec le serveur SMTP.
+
+## Envoyer un email 
+``` 
+MAIL FROM: <user1@domainName.smth>
+------
+RCPT TO: <user1@domainName.smth> NOTIFY=success,failure
+------
+DATA
+
+354 End data with <CR><LF>.<CR><LF>
+
+From: <user1@domainName.smth>
+To: <user1@domainName.smth>
+Subject: NomSujet
+Date: Tue, 28 Sept 2021 16:32:51 +0200
+text of the email.
+.
+-----
+QUIT
+```
+
+

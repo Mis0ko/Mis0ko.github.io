@@ -1,0 +1,50 @@
+# SMB (Server Message Block) : port 445, 137-139
+
+**SMB** est un protocole (basé sur TCP) permettant de réguler l'accès à des fichiers / dossier et autres ressources (comme les imprimantes, routeurs, etc).
+Principalement utilisé sur Windows, compatible avec les anciennes versions ce qui permet d'interagir sur toutes les versions de Windows.
+**Samba** est un logiciel qui permet d'utiliser SMB sur Linux.
+**SMB** permet au client de communiquer aux autres membres du réseaux pour accéder aux fichiers / ressources du réseau.
+
+Les droits d'accès sont définis à partir des **ACL (Access Control Lists)** et sont controléspar attribut comme **execute, read ou full access**.
+
+## Samba
+Samba est l'alternatif de SMB pour Unix. Samba met en oeuvre **CIFS (Common Internet File System)**.
+CIFS est une mise en oeuvre particulière du protocole SMB (ou une extension).
+Cela permet à Samba de communiquer avec les systèmes Windows.
+Quand on utilise des commandes SMB à travers Samba à un ancien service NetBIOS, il se connecte au serveur Samba par les ports 137-139 mais 
+**CIFS** utilise le port 445.
+
+Dans un réseau, chaque hôte participe au même **groupe de travail (workgroup)**. Un groupe de travail est un nom de groupe qui identifie un ensemble arbitraire d'ordinateurs et leurs ressources sur un réseau SMB. 
+
+Le fichier de configuration du serveur SMB se trouve dans **/etc/samba/smb.conf**
+
+## SMBClient - Connection aux ressources
+```smbclient -N -L //IP```
+```smbclient -N -L //IP/cheminRessource```
+- -L : liste les ressoources du serveur
+- -N : utilisation de la session "null" (accès anonyme sans user ni mdp)
+## Téléchargement de fichiers
+```smb: \> get monfichier.txt ```
+
+## Status Samba
+```root@samba:~# smbstatus```
+
+## RPCclient
+le client RPC (pour **Remote Procedure Call**) permet de réaliser des structures ioératuibbekke et de partage du travail dans les réseaux.
+On peut recueillir beaucoup d'information comme cela
+### Connection RPCclient
+```Misoko@home[/home]$ rpcclient -U "" IP```
+### Enumeration des usernames
+Ce script permet de données des informations 
+```Misoko@home[/home]$ samrdump.py IP```
+
+Il existe d'autres outils qui font de l'énumeration également.
+## SMBmap
+Enumération des ressources SMB
+```Misoko@home[/home]$ smbmap -H <FQDN/IP>```
+## CrackMapExec
+Enumération des ressources SMB en session null sans authentification
+```Misoko@home[/home]$ crackmapexec smb <FQDN/IP> --shares -u '' -p '' ```
+## Enum4Linux-ng 
+Enumération des ressources SMB
+```Misoko@home[/home]$ enum4linux-ng.py <FQDN/IP> -A```

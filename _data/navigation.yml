@@ -8,6 +8,8 @@ main:
     url: /blogs
   - title: "WriteUps"
     url: /writeUps
+  - title: "Contenu d'apprentissage"
+    url: /learningContent
   # - title: "Theme"
   #   url: /my-themes/
   # - title: "Sample Collections"
