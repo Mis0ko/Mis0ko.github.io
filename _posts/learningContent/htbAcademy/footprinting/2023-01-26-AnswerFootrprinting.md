@@ -1,7 +1,5 @@
 ---
 title:  "Reponse d'empreinte"
-category: "Introduction"
-tag: "Empreinte"
 ---
 # DNS
 For anyone else still struggling with this specific question, like others have mentioned: start by doing a dig Zone Transfer command on the main domain using the target machine’s IP as the DNS server. Then record all the subdomains you get back. Then use dig to try and Zone Transfer on those subdomains (app.inlanefreight.htb, internal.inlanefreight.htb, dev.inlanefreight.htb, etc.) and record any that you cannot get records for.
