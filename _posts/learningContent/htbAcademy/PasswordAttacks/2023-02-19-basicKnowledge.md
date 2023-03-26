@@ -10,31 +10,30 @@ Les mots de passe sont stockées chiffrés dans le fichier **/etc/shadow** sous 
 ### Format /etc/shadow
 Le format des lignes du fichier est de la forme suivante :
 
-| <nom d'utilisateur> : | <mot de passe crypté> : | <jour de la dernière modification> : | <âge minimum> : | <l'âge maximum> : | <période d'avertissement> : | <période d'inactivité> : | <date d'expiration> : | <champ réservé> |  |
-|-----------------------|-------------------------|--------------------------------------|-----------------|-------------------|-----------------------------|--------------------------|-----------------------|-----------------|--|
+| nom dutilisateur : | mot de passe crypté : | jour de la dernière modification : | age minimum : | l'âge maximum : | période davertissement : | période dinactivité : | date dexpiration : | champ réservé |
 
 Le format du type de chiffrement du mot de passe à la forme suivante :
- \$ id \$ sel $ hash
 
-Autrefois, le nom d'utilisateur + mot de passe étaient stockées dans **/etc/passwd** accessible en lecture à tous les utilisateurs.
+| \$ id | \$ sel | \$ hash |
+
+Autrefois, le nom d'utilisateur ainsi que le mot de passe étaient stockées dans **/etc/passwd** accessible en lecture à tous les utilisateurs.
 Le fichier **shadow** n'est lisible que par l'utilisateur root.
 
 ### Format /etc/passwd
 
-| <nom d'utilisateur> : | \<mot de passe> : | \<uid> : | \<gid> : | \<commentaire> : | <répertoire personnel> : | <cmd exécutée après l'ouverture de session> |
-|-----------------------|------------------|---------|---------|-----------------|--------------------------|--------------------------------------------|
+| nom dutilisateur : | mot de passe : | uid : | gid : | commentaire : | répertoire personnel : | cmd exécutée après louverture de session |
 
 # Processus d'authentification Windows
-Le LSA (Local Security Authority) est un sous-système protégé qui authentifie les utilisateurs et les connecte à l'ordinateur local. En outre, le LSA maintient des informations sur tous les aspects de la sécurité locale sur un ordinateur. Il fournit également des services de traduction de noms en IDs de sécurité (SIDs).
+Le LSA (Local Security Authority) est un sous-système protégé qui authentifie les utilisateurs et les connectent à l'ordinateur local. En outre, le LSA maintient des informations sur tous les aspects de la sécurité locale sur un ordinateur. Il fournit également des services de traduction de noms en IDs de sécurité (SIDs).
 
-Le LSA garde la trace des politiques de sécurité et des comptes qui résides sur un système informatique (qui sont stockées dans l'Active Directory).
+Le LSA garde la trace des politiques de sécurité et des comptes qui résident sur un système informatique (qui sont stockées dans l'Active Directory).
 
 Il permet également de surveiller les accès aux objets, les permissions utilisateurs et générer des messages de monitoring.
 
 ### LSASS (Local Security Authority Subsystem Service)
 C'est un ensemble de modules et il a accès à tous les processus d'authentification qui se trouvent dans **/SystemRoot/System32/Lsass.exe**.
 
-Il est respponsable de la politique de sécurité du système **local**, de l'authentification des utilisateurs et de l'envoie de logs au journal des évènements.
+Il est responsable de la politique de sécurité du système **local**, de l'authentification des utilisateurs et de l'envoie de logs au journal des évènements.
 
 ## Bases de données SAM
 Le SAM (Security Account Manager) est une Base de données Windows qui **stocke les mots de passes des utilisateurs.** 
