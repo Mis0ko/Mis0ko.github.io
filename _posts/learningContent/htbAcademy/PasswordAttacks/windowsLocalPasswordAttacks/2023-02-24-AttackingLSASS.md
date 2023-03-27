@@ -1,16 +1,20 @@
-# Attaque de LSASS
+---
+title:  "Attaque de LSASS"
+category: "Attaque de mots de passe local Windows"
+tag: "Attaques de mots de passe"
+---
 LSASS est un service qui joue un rôle central dans la gestion des credentials et les processus d'authentification au sein de Windows.
 
 Lors de la première connexion, LSASS va :
 
-- Mettre en cache les credentials localement en mémoire
-- Créer des [jetons d'accès](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
-- Appliquer les politiques de sécurité
-- écrire dans le [journal de sécurité de Windows](https://learn.microsoft.com/en-us/windows/win32/eventlog/event-logging-security).
+- Mettre en cache les credentials localement en mémoire.
+- Créer des [jetons d'accès](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens).
+- Appliquer les politiques de sécurité.
+- Écrire dans le [journal de sécurité de Windows](https://learn.microsoft.com/en-us/windows/win32/eventlog/event-logging-security).
 
 Nous allons voir des outils et techniques afin de dump la mémoire de LSASS et extraire les informations d'identification d'une cible fonctionnant sous Windows.
 
-## Méthode du gestionnaire des tâches
+## Méthode du gestionnaire des tâches
 En ayant accès à une session graphique interactive avec la cible, nous pouvons utiliser le gestionnaire de tâches pour créer un "memory dump".
 
 ```console

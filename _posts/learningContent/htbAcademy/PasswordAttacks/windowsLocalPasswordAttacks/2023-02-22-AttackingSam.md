@@ -1,15 +1,20 @@
-# Attaque du SAM
+---
+title:  "Attaque du SAM"
+category: "Attaque de mots de passe local Windows"
+tag: "Attaques de mots de passe"
+---
 
-En ayant accès à un système Windows n'ayant pas join de domaine, on peut facilement récupérer les fichiers associés à la BDD SAM (contenant les hashes des mdp qui se trouve dans le dossier C:\Windows\System32\config) et les transférer à notre machine afin de les cracker offline.
+En ayant accès à un système Windows n'ayant pas rejoint de domaine, on peut facilement récupérer les fichiers associés à la Base de données SAM (contenant les hashes des mdp qui se trouve dans le dossier C:\Windows\System32\config) et les transférer à notre machine afin de les cracker offline.
 
 ## Copie des ruches de registres
 En ayant un accès admin local sur la cible, on peut récupérer 3 ruches de registres qui vont aider à cracker les hashes.
 
-| Répertorie de registres | Description                                                                                                                                                                              |
+| Répertorie de registres | Description |
 |-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | hklm\sam                | Contient les hachages associés aux mots de passe des comptes locaux. Nous aurons besoin de ces hachages pour les craquer et obtenir les mots de passe des comptes utilisateurs en clair. |
 | hklm\system             | Contient la clé de démarrage du système, qui est utilisée pour chiffrer la base de données SAM. Nous aurons besoin de la clé de démarrage pour déchiffrer la base de données SAM.         |
 | hklm\security           | Contient les informations d'identification en cache pour les comptes de domaine. Il peut être avantageux de l'avoir sur une cible Windows reliée à un domaine.                           |
+
 On peut sauvegarder cette ruche en utilisant l'utilitaire **reg.exe**.
 
 ## Utilisation de reg.exe save pour copier les ruches du registre
@@ -23,7 +28,7 @@ C:\WINDOWS\system32> reg.exe save hklm\security C:\security.save
 ```
 Ensuite, il faut les transférer sur le poste attaquant. On peut utiliser [Impacket's smbserver.py](https://github.com/fortra/impacket/blob/master/examples/smbserver.py) pour cela.
 
-## Création d'une ressource partagé avec smbserver.py
+## Création d'une ressource partagée avec smbserver.py
 Pour cela, nous allons lancer le script python smbserver.py avec l'option **-smb2support** qui permet de supporter les nouvelles version de smb venant de l'hôte Windows (SMBv1 par défaut).
 
 ```console
@@ -50,9 +55,9 @@ Misoko@htb[/htb]$ python3 /usr/share/doc/python3-impacket/examples/secretsdump.p
 On peut voir dans l'output de la commande que la première étape de secretsdump consiste à récupérer la clé de démarrage du système avant de procéder au dump de **LOCAL SAM hashes**.
 Il ne peut pas le faire sans la clé car la BDD SAM est chiffré par cette dernière.
 
-## Cracker le hash avec Hashcat
-### Ajouter ntshash dans un fichier .txt
-Auparavant les hash avait le format LM hash, maintenant on utilise plutôt le nt.
+## Cracker le hash avec Hashcat
+### Ajouter ntshash dans un fichier .txt
+Auparavant les hash avaient le format **LM hash**, maintenant on utilise plutôt le **nt**.
 Une fois dans le fichier texte, on peut cracker le hash avec hashcat.
 
 ### Cracker un hash NT avec Hashcat
@@ -64,8 +69,9 @@ Misoko@htb[/htb]$ sudo hashcat -m 1000 hashestocrack.txt /usr/share/wordlists/ro
 
 ## Dumping à distance & Secrets LSA
 
-Explication des secrets LSA : [Secret LSA](https://www.passcape.com/index.php?section=docsys&cmd=details&id=23)
-Avec l'accès aux credentials en tant que **local admin**, on peut cibler les secrets LSA à travers un réseau. On peut donc récupérer des credentials depusi un service en cours d'exécution, tâche planifiée ou application qui utilise les secrets LSA comme stockage de mot de passes.
+Explication des secrets LSA : [Secret LSA](https://www.passcape.com/index.php?section=docsys&cmd=details&id=23).\
+Avec l'accès aux credentials en tant que **local admin**, on peut cibler les secrets LSA à travers un réseau.\
+On peut donc récupérer des credentials depuis un service en cours d'exécution, tâche planifiée ou application qui utilise les secrets LSA comme stockage de mot de passes.
 
 ### Dumping de Secrets LSA à Distance
 ```console
