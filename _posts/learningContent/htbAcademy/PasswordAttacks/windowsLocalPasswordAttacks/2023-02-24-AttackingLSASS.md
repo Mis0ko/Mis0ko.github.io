@@ -31,13 +31,13 @@ C:\Users\loggedonusersdirectory\AppData\Local\Temp
 
 C'est le fichier à transférer à notre hôte d'attaque (que l'on peut faire de la même manière que pour l'attaque de SAM).
 
-## Méthode Rundll32.exe & Comsvcs.dll 
+## Méthode Rundll32.exe & Comsvcs.dll 
 
-Avec la méthode précédente, nous sommes limité à l'utilisation d'une GUI.
-Avec cette méthode, nous utilisons la commande [rundll32.exe](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/rundll32) avec une ligne de commande.
-Il faut noter que cette méthode est détecté des antivirus modernes.
+Avec la méthode précédente, nous sommes limités à l'utilisation d'une GUI.\
+Avec cette méthode, nous utilisons la commande [rundll32.exe](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/rundll32) avec une ligne de commande.\
+Il faut noter que cette méthode est détectée des antivirus modernes.
 
-Avant de laner la commande permettant de créé le fichier dump de LSASS, nous devons connaître le **PID** de **lsass.exe**.
+Avant de lancer la commande permettant de créer le fichier dump de LSASS, nous devons connaître le **PID** de **lsass.exe**.
 
 ### Trouver le PID de LSASS à partir du cmd
 ```console
@@ -53,9 +53,9 @@ Une fois le PID récupéré, on peut créer le dump.
 ```console
 PS C:\Windows\system32> rundll32 C:\windows\system32\comsvcs.dll, MiniDump PID C:\lsass.dmp full
 ```
-Cette commande exécute **rundll32.exe** qui appelle ***comscs.dll** qui appelle la fonction **MiniDumpWriteDump(MiniDump)** pour dump la mémoire du processus LSASS dans la localisation **C:\lsass.dmp**.
+Cette commande exécute **rundll32.exe** qui appelle **comscs.dll** qui appelle la fonction **MiniDumpWriteDump(MiniDump)** pour dump la mémoire du processus LSASS dans la localisation **C:\lsass.dmp**.
 
-La plupart des AV récent bloque la commande et il faudra trouver un moyen de les bypass.
+La plupart des AV récents bloquent la commande et il faudra trouver un moyen de les bypass.
 
 
 ## Utilisation de Pypykatz pour extraire les Crédentials

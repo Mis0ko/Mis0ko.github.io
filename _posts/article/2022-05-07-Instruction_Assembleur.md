@@ -1,5 +1,5 @@
 ---
-title:  "[0x1] Instruction Assembleur"
+title:  "Instruction Assembleur"
 date:   2022-05-07
 category: article
 ---

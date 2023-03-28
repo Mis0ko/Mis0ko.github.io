@@ -1,13 +1,18 @@
-# "Cedentials Hunting" sur Windows
-Une fois l'accès à une machine à travers une GUI ou CLI, nous pouvons passer à la **"Credentials Hunting"**.
-Elle consiste au processus d'effectuer une recherche approfondie des credentials à travers le système de fichiers et divers applications.
+---
+title:  "\"Credentials Hunting\" sur Windows"
+category: "Attaque de mots de passe local Windows"
+tag: "Attaques de mots de passe"
+---
+Une fois l'accès à une machine à travers une GUI ou CLI, nous pouvons passer au **"Credentials Hunting"**.
+Cela consiste au processus d'effectuer une recherche approfondie des credentials à travers le système de fichiers et divers applications.
 On considère ici que l'on a accès à une machine Windows 10.
 
 ## Recherche centralisée
-Il existe des outils sur windows permettant une recherche centralisée dans la plupart des applications et OS. Un utilisateur peut par exemple avoir documenté les mots de passe quelquepart dans le système ou laisser les credentials par défaut.
+Il existe des outils sur windows permettant une recherche centralisée dans la plupart des applications et OS. Un utilisateur peut par exemple avoir documenté les mots de passe quelquepart dans le système ou laisser les credentials par défaut.\
 On utilisera les outils fournits par Windows pour trouver cela.
 
 Par exemple, il est bon de noter les mots clés suivants et de s'en servir lors de nos recherches.
+
 | Passwords     | Passphrases  | Keys        |
 |---------------|--------------|-------------|
 | Username      | User account | Creds       |
@@ -22,7 +27,7 @@ Avec l'accès à un GUI, on peut essayer de passer par le "**Windows Search**" p
 L'outil permet de chercher dans le système de fichier et les applications contenant le mot clé fournit.
 
 ### Lazagne
-C'est un outil permettant de récupérer tous les credentials des applications installées sur l'hoste qui auraient stockées les credentials de manière non sécurisé.
+C'est un outil permettant de récupérer tous les credentials des applications installées sur l'hôte qui auraient stockées les credentials de manière non sécurisé.
 
 On peut récupérer une copie indépendante [ici](https://github.com/AlessandroZ/LaZagne/releases/) ou le [github](https://github.com/AlessandroZ/LaZagne).
 On peut utiliser **xfreerdp** pour avoir un client **RDP** et ainsi faire un drag and drop de l'exécutable LaZagne.
@@ -51,7 +56,7 @@ D'autres pistes à garder en tête lors de la chasse aux credentials :
 - Mots de passe dans le fichier web.config sur les machines de dev et dans les shares IT.
 - unattend.xml
 - Mots de passe dans les champs de description de l'utilisateur ou de l'ordinateur AD
-- Base de données KeePass --> récupérer les hash, les cracker et obtenir pleins d'accès.
-- Trouvaille dans les systèmes des utilisateurs et les shares
+- Bases de données KeePass --> récupérer les hash, les cracker et obtenir pleins d'accès.
+- Trouvailles dans les systèmes des utilisateurs et les shares
 - Fichiers comme pass.txt, passwords.docx, passwords.xlsx trouvés sur les systèmes des utilisateurs, shares, Sharepoint
 

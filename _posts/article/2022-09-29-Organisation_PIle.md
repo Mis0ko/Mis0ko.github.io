@@ -1,5 +1,5 @@
 ---
-title:  "[0x02] Organisation Pile / convention d'appels de fonction"
+title:  "Organisation Pile / convention d'appels de fonction"
 date:   2022-09-29
 category: article
 ---
