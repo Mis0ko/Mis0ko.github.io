@@ -14,14 +14,14 @@ header:
 <h1 style="display: inline; font-size:50px;">HackTheBox Academy</h1>
   <p></p>
 
-{% assign sorted_tags = site.tags | sort %}
+{% assign sorted_tags = site.tags%}
 {% for tag in sorted_tags %}
   {% if excluded_tags contains tag[0] %}
   {% else %}
   <h1 style="display: inline;">{{ tag[0] }}</h1><p></p>
       {% assign posts_for_tag = tag[1] %}
-      {% assign posts_for_tag_sorted = posts_for_tag | sort: 'categories' %}
-      {% assign categories_for_tag = posts_for_tag_sorted | map: 'categories' | join: ',' | split: ',' | uniq | sort %}
+      {% assign posts_for_tag_sorted = posts_for_tag | sort: 'categories' | sort: 'date' %}
+      {% assign categories_for_tag = posts_for_tag_sorted | map: 'categories' | join: ',' | split: ',' | uniq %}
       {% for category in categories_for_tag %}
       <h4 style="display: inline;">{{ category }}</h4><p></p>
       <ul>
