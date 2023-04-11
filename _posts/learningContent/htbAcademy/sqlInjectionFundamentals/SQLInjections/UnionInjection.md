@@ -98,4 +98,3 @@ Un exemple pour voir si on arrive à obtenir une information du serveur, serait 
 cn' UNION select 1,version,3,4-- -
 ```
 
-
