@@ -1,0 +1,2 @@
+- Lab: Blind OS command injection with out-of-band interaction
+- Lab: Blind OS command injection with out-of-band data exfiltration
