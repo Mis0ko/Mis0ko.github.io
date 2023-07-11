@@ -81,7 +81,7 @@ On a également la possibilité de faire des commandes de types inline :
 - `` ` ``
 - `$()`
 
-## Comment se prémunir des Injections de commandes OS
+## Comment s'en prémunir
 La meilleure manière de s'en prémunir est de ne jamais appeler des commandes OS à partir d'un code provenant de la couche applicative. Il existe des alternatives sécurisées notamment avec des APIs.
 
 S'il est inévitable de faire une commande OS avec une entrée utilisateur, alors une validation de l'entrée doit être faite, ce qui peut inclure :

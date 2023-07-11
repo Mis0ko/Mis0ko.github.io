@@ -1,5 +1,5 @@
 ---
-title: "Authentification avec mot de passes"
+title: "Authentification with passwords"
 category: "Authentification"
 tag: "Web : Serveur"
 ---

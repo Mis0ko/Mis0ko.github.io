@@ -49,7 +49,7 @@ Il existe d'autres encodages non-standars qui peuvent passer, comme `..%c0%af` o
 `filename=../../../etc/passwd%00.png`
 
 
-## Comment se prévenir d'une attaque Directory Traversal
+## Comment s'en prémunir
 Le meilleur moyen de s'en prévenir est d'éviter de passer des entrées utilisateur dans une API de système de fichiers.
 
 S'il est nécessaire de fournir une entrée utilisateur à une API de système de fichiers, alors :
