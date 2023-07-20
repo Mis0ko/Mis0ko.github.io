@@ -4,7 +4,7 @@ category: "Injections SQL"
 tag: "Principes de base de l'injection SQL"
 ---
 # SQLI Injection
-Pour découvrir des SQL Injections, une bonne façon de faire est de tester les caractères suivants dans les champs cibles.
+Pour découvrir des injections SQL, une bonne façon de faire est de tester les caractères suivants dans les champs cibles.
 
 | Payload | URL Encodé |
 |---------|-------------|
@@ -33,7 +33,7 @@ L'insertion de la quote implique qu'il y a maintenant un nombre impair de quotes
 
 Pour contourner l'authentification, il faut que la requête renvoie toujours **true**, quels que soient le nom d'utilisateur et le mot de passe saisis. Pour ce faire, nous pouvons abuser de l'opérateur **OR** dans notre injection SQL.
 
-L'opérateur AND est évalué avant l'opérateur **OR**. Cela signifie que s'il y a au moins une condition **TRUE** dans la requête entière avec un opérateur **OR**, la requête entière sera évaluée à **TRUE** puisque l'opérateur **OR** renvoie **TRUE** si l'un de ses opérandes est **true**.
+L'opérateur **AND** est évalué avant l'opérateur **OR**. Cela signifie que s'il y a au moins une condition **TRUE** dans la requête entière avec un opérateur **OR**, la requête entière sera évaluée à **TRUE** puisque l'opérateur **OR** renvoie **TRUE** si l'un de ses opérandes est **true**.
 
 L'instruction **'1'='1'** est un exemple fonctionnel. Cependant, pour conserver un nombre pair de quotes lorsqu'on injecte l'exemple dans la requête, on va enlever une quote, et on va plutôt utiliser des exemples comme le suivant (pour le username dans notre cas )
 ```sql
@@ -47,7 +47,7 @@ SELECT * FROM logins WHERE username='admin' or '1'='1' AND password = 'something
 Ce qui signifie :
 - Si le nom d'utilisateur est admin
 OU
-- Si 1=1 renvoie true 'qui renvoie toujours true'
+- Si 1=1 renvoie true (c'est toujours le cas)
 ET
 - Si le mot de passe est 'something'
 
@@ -58,7 +58,7 @@ L'opérateur **AND** sera évalué en premier et renverra un résultat **False**
 > Il est à noter que ce payload est un parmi beaucoup d'autres payloads pour contourner l'authentification, que l'on peut retrouver notamment dans [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#authentication-bypass).
 
 
-### Bypass sans connaissance du nom d'utilisateur
+### Contourner sans connaissance du nom d'utilisateur
 
 Finalement, même si l'on ne connait pas le nom d'utilisateur, dans notre cas nous pouvons simplement ajouter une condition OR de manière similaire dans le mot de passe ce qui provoquera une condition vrai dans le **WHERE**.
 

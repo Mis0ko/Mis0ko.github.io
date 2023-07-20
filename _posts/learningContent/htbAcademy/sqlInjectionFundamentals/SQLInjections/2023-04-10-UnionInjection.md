@@ -1,5 +1,5 @@
 ---
-title:  "injection Union"
+title:  "Injection Union"
 category: "Injections SQL"
 tag: "Principes de base de l'injection SQL"
 ---
@@ -23,7 +23,7 @@ L'instruction **UNION** peut s'opérer sur les instructions **SELECT** ayant un 
 Si deux **SELECT** ont un nombre de colonnes différents, une erreur sera renvoyée.
 
 Il est donc nécessaire de savoir combien de colonnes la requête de base va renvoyée afin de pouvoir faire un union avec une requête injectée.
-Par exemple, si on suppose que la requête suviante renvoie 2 colonnes.
+Par exemple, si on suppose que la requête suivante renvoie 2 colonnes.
 
 ```sql
 SELECT * FROM products WHERE product_id = 'user_input'
