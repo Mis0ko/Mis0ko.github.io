@@ -1,7 +1,7 @@
 ---
 title: "Directory/file path traversal"
-category: "Directory traversal"
-tag: "Web : Serveur"
+category: "Serveur"
+tag: "Web"
 ---
 
 ## CheckList en pratique

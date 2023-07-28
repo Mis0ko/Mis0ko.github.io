@@ -1,6 +1,7 @@
 ---
 title: "File Upload Vulnerabilities"
-tag: "Web : Serveur"
+category : "Serveur"
+tag: "Web"
 ---
 
 

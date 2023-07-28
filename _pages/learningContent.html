@@ -11,9 +11,6 @@ header:
 
 {% assign excluded_tags = "writeups, test" | split: ", " %}
 
-<h1 style="display: inline; font-size:50px;">HackTheBox Academy</h1>
-  <p></p>
-
 {% assign sorted_tags = site.tags%}
 {% for tag in sorted_tags %}
   {% if excluded_tags contains tag[0] %}

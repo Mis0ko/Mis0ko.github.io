@@ -1,7 +1,7 @@
 ---
 title: "Authentification with passwords"
-category: "Authentification"
-tag: "Web : Serveur"
+category: "Serveur"
+tag: "Web"
 ---
 
 # Attaque Brute-force

@@ -1,7 +1,7 @@
 ---
-title: "OS command injection"
-category: "Command Injection"
-tag: "Web : Serveur"
+title: "Command injection"
+category: "Serveur"
+tag: "Web"
 ---
 
 ## CheckList en pratique

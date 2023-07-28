@@ -1,27 +1,27 @@
 ---
 title: "Business Logic vulnerabilities Examples"
-category: "Business Logic vulnerabilities"
-tag: "Web : Serveur"
+category: "Serveur"
+tag: "Web"
 ---
 
 ## CheckList en pratique
-- Vérifier que les contrôles côté serveur existent (par ex : changer le prix d'un achat), 2FA qu'on te puisse pas bruteforce.
+- Vérifier que les contrôles côté serveur existent (par ex : changer le prix d'un achat), 2FA qu'on ne puisse pas bruteforce.
 - Vérifier la prise en compte des données non conventionnelles (par ex: limite des entiers)
 - Penser au troncage d'adresse mail si des vérifications sont faites dessus.
 - Données obligatoires non fournies (paramètres `GET`,`POST` & `cookies`):
-    - Supprimer un seul paramètre à la fois afin de s'assure que tous les chemins de code pertinents sont atteints 
+    - Supprimer un seul paramètre à la fois afin de s'assurer que tous les chemins de code pertinents sont atteints. 
     - Essayer de supprimer le nom du paramètre ainsi que sa valeur. Le serveur traitera généralement les deux cas différemment.
     - Suivre les processus en plusieurs étapes jusqu'au bout. Il arrive que la modification d'un paramètre à une étape ait un effet sur une autre étape plus loin dans le processus.
-- Vérifier que les séquences d'étapes prennent en compte qu'on arrive pas jusqu'au bout (authent 2FA se fait avant la vérification du code par exemple)
+- Vérifier que les séquences d'étapes prennent en compte qu'on n'arrive pas jusqu'au bout (authentification 2FA se fait avant la vérification du code par exemple).
 - Vérifier que chaque étape est requise et contrôlée lors d'un flux de travail :
-    - En sautant certaines étapes
-    - En accédant à une étape plus d'une fois
-    - En revenant à une étape précédente
-On peut prendre comme exemple le fait de jouer une requête POST "validation de panier" rejouer sans faire la requête qui vérifie la valeur du panier.
+    - En sautant certaines étapes.
+    - En accédant à une étape plus d'une fois.
+    - En revenant à une étape précédente.
+On peut prendre comme exemple le fait de jouer une requête POST "validation de panier", rejouer sans faire la requête qui vérifie la valeur du panier.
 
 ## Confiance excessive dans les contrôles côté client
 Une hypothèse fondamentalement érronée est le fait de croire que l'utilisateur va intéragir avec l'application seulement via l'interface web fournie (et donc faire confiance aux validation côté client).
-Cependant, un attaquant peut simplement utiliser des outils comme Burp Proxy pour altérer les données après qu'elles soient envoyées par le navigateur mais avant qu'elles soient passer par la logique du côté serveur. L'attaquant peut ainsi faire des dommages de manière relativement facile.
+Cependant, un attaquant peut simplement utiliser des outils comme Burp Proxy pour altérer les données après qu'elles soient envoyées par le navigateur mais avant qu'elles soient passées par la logique du côté serveur. L'attaquant peut ainsi faire des dommages de manière relativement facile.
 
 **Recommandation** : Toujours vérifier l'intégrité des données et faire des validations de données côté serveur.
 
@@ -51,17 +51,17 @@ Malheureusement, certaines applications commettent l'erreur de supposer qu'aprè
 
 ## Les utilisateurs ne fournissent pas toujours les données obligatoires
 Comme on en a parlé précédemment, ce cas ne concerne pas les utilisateurs ordinaires mais les attaquants.
-Ce problème se pose lorsqu'il existe plusieurs signatures d'un même nom de fonction. Du côté serveur, la précense ou absence d'un paramètre particulier peut déterminer quel code est exécuté.
+Ce problème se pose lorsqu'il existe plusieurs signatures d'un même nom de fonction. Du côté serveur, la présence ou absence d'un paramètre particulier peut déterminer quel code est exécuté.
 
 Lorsqu'on recherche des défauts de logique, on doit supprimer les paramètres à tour de rôle et observer l'effet sur la réponse.
 Pour cela (paramètres `GET`,`POST` & `cookies`):
-- Supprimer un seul paramètre à la fois afin de s'assure que tous les chemins de code pertinents sont atteints 
+- Supprimer un seul paramètre à la fois afin de s'assurer que tous les chemins de code pertinents sont atteints.
 - Essayer de supprimer le nom du paramètre ainsi que sa valeur. Le serveur traitera généralement les deux cas différemment.
 - Suivre les processus en plusieurs étapes jusqu'au bout. Il arrive que la modification d'un paramètre à une étape ait un effet sur une autre étape plus loin dans le processus.
 
 <u>Exemple à penser :</u>
-- Non vérification d'un mdp pour le changement de ce dernier une fois authentifié
-- Fonctionnalité mot de passe oublié
+- Non vérification d'un mdp pour le changement de ce dernier une fois authentifié.
+- Fonctionnalité mot de passe oublié.
 
 ## Les utilisateurs ne suivent pas toujours la séquence prévue
 
@@ -88,7 +88,9 @@ Comme pour toutes les failles logiques, il faut essayer d'identifier les hypoth�
 On retrouve de nombreux défauts de logique spécifique à un domaine commercial ou au but du site.
 La fonctionnalité de réduction d'un site web en est un bon exemple :
 
-Prenons l'exemple d'une boutique en ligne qui offre une remise de 10 % sur les commandes supérieures à 1 000 dollars. Cette boutique pourrait être vulnérable aux abus si la logique commerciale ne vérifie pas si la commande a été modifiée après l'application de la réduction. Dans ce cas, un attaquant pourrait simplement ajouter des articles à son panier jusqu'à ce qu'il atteigne le seuil de 1 000 dollars, puis supprimer les articles qu'il ne souhaite pas avant de passer la commande. Il bénéficierait alors de la remise sur sa commande, même si celle-ci ne répond plus aux critères prévus.
+Prenons l'exemple d'une boutique en ligne qui offre une remise de 10 % sur les commandes supérieures à 1 000 dollars. Cette boutique pourrait être vulnérable aux abus si la logique commerciale ne vérifie pas si la commande a été modifiée après l'application de la réduction.
+
+Dans ce cas, un attaquant pourrait simplement ajouter des articles à son panier jusqu'à ce qu'il atteigne le seuil de 1 000 dollars, puis supprimer les articles qu'il ne souhaite pas avant de passer la commande. Il bénéficierait alors de la remise sur sa commande, même si celle-ci ne répond plus aux critères prévus.
 
 
 <u>**A faire attention :**</u> identifier les situations où les prix (ou autres valeurs sensibles) sont ajustées basé sur un critère déterminé par les actions de l'utilisateur.
