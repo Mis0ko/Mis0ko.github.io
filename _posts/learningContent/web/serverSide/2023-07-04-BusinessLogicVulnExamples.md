@@ -1,14 +1,14 @@
 ---
-title: "Business Logic vulnerabilities Examples"
+title: "Business Logic vulnerabilities : Exemples"
 category: "Serveur"
 tag: "Web"
 ---
 
-## CheckList en pratique
+## <u>CheckList en pratique</u>
 - Vérifier que les contrôles côté serveur existent (par ex : changer le prix d'un achat), 2FA qu'on ne puisse pas bruteforce.
 - Vérifier la prise en compte des données non conventionnelles (par ex: limite des entiers)
 - Penser au troncage d'adresse mail si des vérifications sont faites dessus.
-- Données obligatoires non fournies (paramètres `GET`,`POST` & `cookies`):
+- Données obligatoires non fournies (paramètres `GET`,`POST` & `cookies`, changement de mdp une fois authentifié, mdp oublié, ...):
     - Supprimer un seul paramètre à la fois afin de s'assurer que tous les chemins de code pertinents sont atteints. 
     - Essayer de supprimer le nom du paramètre ainsi que sa valeur. Le serveur traitera généralement les deux cas différemment.
     - Suivre les processus en plusieurs étapes jusqu'au bout. Il arrive que la modification d'un paramètre à une étape ait un effet sur une autre étape plus loin dans le processus.
@@ -18,18 +18,20 @@ tag: "Web"
     - En accédant à une étape plus d'une fois.
     - En revenant à une étape précédente.
 On peut prendre comme exemple le fait de jouer une requête POST "validation de panier", rejouer sans faire la requête qui vérifie la valeur du panier.
+- Penser aux défauts spécifiques à un domaine en ce qui concerne la valeur de l'entreprise, comme l'argent par exemple (promotion toujours valides après retrait des articles, autres critères liés au business).
 
 ## Confiance excessive dans les contrôles côté client
 Une hypothèse fondamentalement érronée est le fait de croire que l'utilisateur va intéragir avec l'application seulement via l'interface web fournie (et donc faire confiance aux validation côté client).
 Cependant, un attaquant peut simplement utiliser des outils comme Burp Proxy pour altérer les données après qu'elles soient envoyées par le navigateur mais avant qu'elles soient passées par la logique du côté serveur. L'attaquant peut ainsi faire des dommages de manière relativement facile.
 
-**Recommandation** : Toujours vérifier l'intégrité des données et faire des validations de données côté serveur.
+**Recommandation** : 
+Toujours vérifier l'intégrité des données et faire des validations de données côté serveur.
 
 ## Ne pas traiter les données non conventionnelles
 
-Lors de l'audit d'une application, utiliser Burp Proxy et Repeater pour essayer de soumettre des valeurs non conventionnelles. En particulier, essayer de saisir des données dans des fourchettes que les utilisateurs légitimes ne saisiront probablement jamais.
+Lors de l'audit d'une application, utiliser `Burp Proxy` et `Repeater` pour essayer de soumettre des valeurs non conventionnelles. En particulier, essayer de saisir des données dans des fourchettes que les utilisateurs légitimes ne saisiront probablement jamais.
 
-Exemples :
+<u>Exemples :</u>
 - Des entrées numériques exceptionnellement élevées ou basses. 
 - Des chaînes de caractères anormalement longues pour les champs textuels.
 - Des types de données inattendus. 
@@ -44,7 +46,7 @@ Garder à l'esprit que si on trouve un formulaire sur le site web cible qui ne p
 
 ## Faire des hypothèses erronées sur le comportement des utilisateurs
 
-### Les utilisateurs de confiance ne restent pas toujours dignes de confiance
+### Les utilisateurs de confiance ne restent pas toujours dignes de confiance
 Les applications peuvent sembler sûres parce qu'elles mettent en œuvre des mesures apparemment robustes pour appliquer les règles de l'entreprise.
 
 Malheureusement, certaines applications commettent l'erreur de supposer qu'après avoir passé ces contrôles stricts au départ, l'utilisateur et ses données sont indéfiniment dignes de confiance. Il peut en résulter une application relativement laxiste des mêmes contrôles à partir de ce moment-là.
@@ -63,7 +65,7 @@ Pour cela (paramètres `GET`,`POST` & `cookies`):
 - Non vérification d'un mdp pour le changement de ce dernier une fois authentifié.
 - Fonctionnalité mot de passe oublié.
 
-## Les utilisateurs ne suivent pas toujours la séquence prévue
+## Les utilisateurs ne suivent pas toujours la séquence prévue
 
 De nombreuses transactions s'appuient surs des flux de travail prédéfinis consistant en une séquence d'étape. En principe, l'interface web guide l'utilisateur du début à la fin de ce processus, mais ce n'est pas le cas pour les attaquants qui ne respecteront pas la séquence prévue.
 

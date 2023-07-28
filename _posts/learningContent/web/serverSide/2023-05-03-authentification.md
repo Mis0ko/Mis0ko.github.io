@@ -34,7 +34,7 @@ Il existe plusieurs cas de figures pour énumérer des usernames :
 
 Pour contrer la protection bruteforce:
 - **Blocage d'IP** : utiliser le **header X-Forwarded-For** s'il est supporté (permet d'usurper une adresse IP). Le faire varier à chaque requête avec **Pitchfork**.
-- de **faille logique** (blocage après un nombre de tentative mais réinitialisé après connection établie) : si on connait un username/password et qu'on veut bruteforce le password d'un compte dont on a l'identifiant, on fait une liste de usernames (en répétant par intervale régulier l'identifiant du compte connu), une liste de password (idem avec le password connu). Puis on exécute une attaque par **Pitchfork**.
+- de **faille logique** (blocage après un nombre de tentative mais réinitialisé après connection établie) : si on connait un username/password et qu'on veut bruteforce le password d'un compte dont on a l'identifiant, on fait une liste de usernames (en répétant par intervalle régulier l'identifiant du compte connu), une liste de password (idem avec le password connu). Puis on exécute une attaque par **Pitchfork**.
 
 ## Authentification HTTP Basique
 Cette authentification est ancienne mais peut toujours exister. Dans ce cadre là, le client reçoit un token du serveur, qui est construit par concaténation du nom d'utilisateur et du mot de passe, encoder en base64. 
