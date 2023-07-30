@@ -6,14 +6,44 @@ tag: "Web"
 
 # Comment trouver et exploiter les vulnérabilités liées à la divulgation d'informations
 
-## CheckList en pratique
+## Checklist en pratique
 
-A FAIRE
+
+- Fichiers destinés aux robots d'indexation : `/robots.txt` et `/sitemap.xml`.
+- Faire un listing de répertoires (`dirbuster`).
+- Penser à regarder les commentaires du code source.
+- Données de debogage : provoquer des erreurs avec des données incongrues et observer les réponses/messages de debug.
+- Page de comptes utilisateurs : tester des défauts de logiques pour l'accès à d'autres utilisateurs que celui connecté.
+- Backups : Fichiers temporaires des éditeurs de texte (commençant par `~`, ou avec une `différente extension de fichier`).
+- Configuration non-sécurisée : 
+    - Méthode http `TRACE` mal configurée peut faire de la divulgation d'informations.
+- Historique de contrôleur de versions : 
+    - Dossier `.git` à requêter s'il est présent en prod.
+- Faire du [Fuzzing](http://mis0ko.github.io/serveur/InformationDisclosureTesting/#fuzzing) sur les paramètres intéressants.
+- Utiliser les [Outils d'engagement](http://mis0ko.github.io/serveur/InformationDisclosureTesting/#outils-dengagement-de-burp) de Burp.
+    - Search
+    - Find comments
+    - Engineering informative responsesPermalink
+
+
+## Explication de la vulnérabilité
+
+La divulgation d'informations (information disclosure), également appelée fuite d'informations (information leakage), se produit lorsqu'un site web révèle involontairement des informations sensibles à ses utilisateurs. 
+Les sites web peuvent divulguer toutes sortes d'informations à un attaquant potentiel, notamment :
+- Des données sur des utilisateurs (username/password)
+- Des données sensibles commerciales
+- Des détails techniques sur le site web ou son infrastructure
+
+Quelques exemples d'**information disclosure** :
+- Révéler les noms des répertoires cachés, leur structure et leur contenu par le biais d'un fichier `robots.txt` ou d'une liste de répertoires.
+- Permettre l'accès aux fichiers de code source par le biais de backups.
+- Mentionner explicitement les noms des tables ou des colonnes de la base de données dans les messages d'erreur.
+- Exposer inutilement des informations très sensibles, telles que les détails d'une carte de crédit.
+- Coder en dur dans le code source des clés API, des adresses IP, des identifiants de base de données, etc.
+- Suggérer l'existence ou l'absence de ressources, de noms d'utilisateur, etc, par le biais de différences subtiles dans le comportement de l'application.
 
 ## Comment tester les vulnérabilités en matière de divulgation d'informations
-Des données sensibles peuvent être divulguées dans toute sorte d'endroits. La plupart du temps elles sont découvertes lors de test d'autres vulnérabilités, donc il est important de ne pas avoir une "vision étroite" lors des tests.
-// https://mis0ko.github.io/serveur/InformationDisclosureTesting/
-
+Des données sensibles peuvent être divulguées dans toutes sortes d'endroits. La plupart du temps elles sont découvertes lors de tests d'autres vulnérabilités, donc il est important de ne pas avoir une "vision étroite" lors des tests.  
 <u>Quelques outils qui peuvent être utiles :</u>
 - Fuzzing
 - Burp Scanner
@@ -60,7 +90,7 @@ A voir si on s'en sert dans les labs car pas compris l'utilité.
 De nombreux sites fournissent les fichiers `/robots.txt` et `/sitemap.xml` pour aider les robots d'indexation (crawlers) à indexer leur site. Ces fichiers peuvent contenir des informations sensibles que les crawlers devraient passer.
 
 ### Listage de répertoires
-Les serveur web peuvent être configurés pour automatiquement lister le contenu des dossiers n'ayant pas de page d'index. Cela permet à un attaquant d'identifier rapidement les ressources à certaines adresses du site.
+Les serveurs web peuvent être configurés pour automatiquement lister le contenu des dossiers n'ayant pas de page d'index. Cela permet à un attaquant d'identifier rapidement les ressources à certaines adresses du site.
 
 Un site sensible au listage de répertoire ne possède pas forcément de vulnérabilité, mais s'il échoue à implémenter un accès de contrôle convenable, cela peut permettre une fuite de données potentiellement sensibles.
 
@@ -96,15 +126,15 @@ Par exemple, un site qui récupère une page de profil d'un compte en se basant 
 
 ### Fichiers de sauvegarde 
 
-Les fichiers de sauvegarde sont un bon moyen pour un attaquant de comprendre le comportement d'un site web et accéder à des données sensibles qui pourraient être hardcodés telles que les **API ekys** ou **credentials** pour accéder à des composants côté serveur.
+Les fichiers de sauvegarde sont un bon moyen pour un attaquant de comprendre le comportement d'un site web et accéder à des données sensibles qui pourraient être hardcodés telles que les **API keys** ou **credentials** pour accéder à des composants côté serveur.
 
 Identifier une technologie opensource utilisée par un site peut permettre d'avoir un accès à une partie limité du code source.
 
-Parfois, il est possible que le site expose son propre code source, qui est référencé explicitement.  
+Parfois, il est possible que le site expose son propre code source, qui est référencé explicitement.
 Malheureusement, requêter du code ne le révèle pas forcément. Quand un server web 
 traite un fichier avec une extension particulière comme `.php`, il va exécuter le code plutôt que simplement l'envoyer au client comme du texte.
 
-Dans certaines situations, il est possible de piéger le site web pour qu'il nous renvoie des contenus de fichier à la place. Par exemple, les éditeurs de texte génère souvent des backup de fichiers temporaire du fichier original qui est en train d'être édité.  
+Dans certaines situations, il est possible de piéger le site web pour qu'il nous renvoie des contenus de fichiers à la place. Par exemple, les éditeurs de texte génère souvent des backups de fichiers temporaire du fichier original qui est en train d'être édité.  
 Ces fichiers sont souvent indiqués en ayant un `~` dans leurs noms de fichiers, ou en ajoutant une `différente extension au fichier`.
 Requêter un fichier de code en utilisant l'extension de fichier de sauvegarde peut permettre d'y accéder.
 
@@ -119,7 +149,11 @@ Par exemple, La méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si 
 Ce comportement est souvent inoffensif, mais il conduit parfois à la divulgation d'informations sensibles telles que les en-têtes d'authentification internes ajoutés par les proxys inversés. 
 
 
-### Historique du contrôle de version 
+### Historique du contrôle de version 
+
+La plupart des sites web sont développés avec un système de contrôle de version, tel que Git. Par défaut, un projet Git stocke toutes ses données de contrôle de version dans un dossier `.git`.
+
+Les sites web peuvent parfois exposés ce dossier en production accessible en navigant sur `/.git`. A partir de là, il est possible d'analyser les différentes versions ainsi que les commentaires à la recherche d'information intéressantes (code source, credentials, key, etc).
 
 
-test
+Faire une fiche de [git](https://git-scm.com/book/fr/v2/Les-bases-de-Git-Visualiser-l%E2%80%99historique-des-validations) quand j'aurais le temps.
