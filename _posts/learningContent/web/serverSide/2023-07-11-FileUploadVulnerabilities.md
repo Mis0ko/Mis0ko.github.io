@@ -1,5 +1,5 @@
 ---
-title: "File Upload Vulnerabilities"
+title: "Vulnérabilités d'upload de fichier"
 category : "Serveur"
 tag: "Web"
 ---
@@ -7,7 +7,15 @@ tag: "Web"
 
 
 ## CheckList en pratique
-- Lors d'une requête d'un fichier, si la réponse contient l'en tête `Content-Type` contient la correspondance entre l'extension du fichier et le type MIME, il n'a peut être pas été explicitement défini (donc changer une extension d'un exe peut le bypass).
+
+Web shell classique pouvant servir :
+- `<?php echo file_get_contents('/path/to/target/file'); ?>`
+- `<?php echo system($_GET['command']); ?>` pour une requête `GET /example/exploit.php?command=id HTTP/1.1`
+
+- Validation défectueuse du type de fichier upload : Modifier le `Content-type` (contient le type `MIME` d'un fichier) d'une partie `Content-Disposition` d'un champ d'entrée pour voir si le serveur fait confiance à ce champ.
+- Essayer de bypass les défenses de type **[répertoires accessible à l'utilisateur](http://127.0.0.1:4000/serveur/FileUploadVulnerabilities/#emp%C3%AAcher-lex%C3%A9cution-de-fichiers-dans-des-r%C3%A9pertoires-accessibles-%C3%A0-lutilisateur)** en appliquant une attaque ***path transversal*** dans le **filename** des requêtes `multipart/form-data` (avec [obfuscation](https://mis0ko.github.io/serveur/directoryTraversal/) si nécessaire).
+
+-blacklist config de serveur à reprendre
 
 ## Explication de la vulnérabilité
 Les vulnérabilités d'upload de fichiers consistent en la possibilité d'upload des fichiers dans le système de fichier du serveur web à l'origine de cette fonctionnalité. 
@@ -19,25 +27,26 @@ Dans certains cas, le fait de télécharger le fichier suffit à lui seul à cau
 ## Quels sont les impacts des vulnérabilités d'upload de fichiers?
 
 L'impact dépend généralement de 2 facteurs :
-- Quel aspect du fichier le site web ne parvient pasà valider correctement ( taille, type, contenu, etc)
+- Quel aspect du fichier le site web ne parvient pas à valider correctement ( taille, type, contenu, etc)
 - Quelles restrictions sont imposés sur le fichier une fois qu'il a été upload.
 
-1. Dans le pire des scénarios, **le type de fichier n'est pas valide** et la configuration de serveur permet à certain types de fichiers (`.php` ou `.jsp`) d'executer du code. Dans ce cas, l'attaquant peut upload un fichier de code côté serveur qui focntionne comme `webshell`, permettant d'avoir total accès au serveur web.
+1. Dans le pire des scénarios, **le type de fichier n'est pas valide** et la configuration de serveur permet à certain types de fichiers (`.php` ou `.jsp`) d'executer du code.  
+Dans ce cas, l'attaquant peut upload un fichier de code côté serveur qui fonctionne comme `webshell`, permettant d'avoir total accès au serveur web.
 
-2. Si **le nom de fichier n'est pas vérifié**, cela permettrai à un attaquant d'écraser des fichiers techniques simplement en téléversant un fichier portant le même nom. Couplé au **directory transversal**, cela permettrait à l'attaquant d'upload des ficheirs dans des localisations non-prévues.
+2. Si **le nom de fichier n'est pas vérifié**, cela permettrait à un attaquant d'écraser des fichiers techniques simplement en téléversant un fichier portant le même nom. Couplé au **directory transversal**, l'attaquant pourrait upload des fichiers dans des localisations non-prévues.
 
 3. La non-vérification de la taille du fichier (en dessous d'un certain seuil prévu) peut permettre une attaque par **déni de service (DOS)**, où l'attaquant rempli l'espace disque.
 
 ## Raisons pour lesquelles la vulnérabilité existe
 - Usage de blacklist avec oubli d'un type de fichier
-- Le site qui tente de vérifier le type de fichier en regarant les propriétés, ce qui peut être manipulé par l'attaquant avec Burp
+- Le site qui tente de vérifier le type de fichier en regardant les propriétés, ce qui peut être manipulé par l'attaquant avec Burp
 - Une validation robuste qui est appliquée de manière incohérente dans le réseau d'hôtes et de dossier qui forme le site.
 
 ## Comment les serveurs web traitent-ils les demandes de fichiers statiques ?
 
 Historiquement, les sites web étaient presque entièrement constitués de fichiers statiques qui étaient présentés aux utilisateurs lorsqu'ils en faisaient la demande, donc le path de chaque requête était mappé sur le path du système de fichier. 
 
-De nos jours, des vérifications sont faites 
+De nos jours, des vérifications sont faites.
 1. Le serveur web parse le path du fichier pour récupérer l'extension du fichier.
 2. Il l'utilise pour déterminer le type de fichier requêté, typiquement en le comparant à une liste de correspondances préconfigurées entre les extensions et les types MIME. La suite dépend du type de fichier et de la configuration du serveur
 3. - Si ce type de fichier **n'est pas exécutable,** comme une image ou une page HTML statique, le serveur peut simplement **envoyer le contenu du fichier au client** dans une réponse HTTP.  
@@ -65,7 +74,7 @@ Dans cette section, nous examinerons certaines méthodes utilisées par les serv
 Puis la manière dont nous pouvons exploiter les failles de ces mécanismes pour obtenir un shell web permettant l'exécution de code à distance.
 
 ### Validation défectueuse du type de fichier
-Lors d'une soumission d'un formulaire HTTP, le navigateur envoie généralement une requête `POST` contenant un **Content-type** avec la valeur `application/x-www-form-url-encoded `. Ce type est bien pour les données "simples" (nom, adresse, etc), mais pas adéquat pour des binaires/images/etc qui contiennent de nombreux caractères non-alphabétiques. On utilise dans ce cas le **Content-type** `multipart/form-data`. 
+Lors d'une soumission d'un formulaire HTTP, le navigateur envoie généralement une requête `POST` contenant un **Content-type** avec la valeur `application/x-www-form-url-encoded`. Ce type est bien pour les données "simples" (nom, adresse, etc), mais pas adéquat pour des binaires/images/etc qui contiennent de nombreux caractères non-alphabétiques. On utilise dans ce cas le **Content-type** `multipart/form-data`. 
 Voir [Ici](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) pour plus de détails.
 
 Prenons un exemple de requête `POST` qui soumets différents types de données, ce qui devrait ressembler à ceci :
@@ -94,8 +103,8 @@ wiener
 ```
 On voit que chaque partie contient un header `Content-Disposition` qui fournit une information basique sur le champ d'entrée. Ces parties peuvent également avoir leur propre header `Content-Type`, qui indiquera au serveur le type `MIME`de la donnée soumise par l'utilisateur.
 
-**<u>Validation des uploads de fichier par des sites web</u>**
-Une des manières est de regarder si le header `Content-Type` correspond à un certain type MIME prédéfini par le serveur. Par exemple un serveur peut choisir de seulement autoriser les types **image/jpeg**.
+**<u>Validation des uploads de fichier par des sites web</u>**  
+Une des manières est de regarder si le header `Content-Type` correspond à un certain type MIME prédéfini par le serveur. Par exemple un serveur peut choisir de seulement autoriser les types **image/jpeg**.  
 Si le serveur fait confiance au `Content-Type` de la requête sans faire d'autres validations (vérifier que le contenu du fichier correspond au type MIME), alors une attaque peut être faite en modifiant la valeur du `Content-Type`.
 
 ### Empêcher l'exécution de fichiers dans des répertoires accessibles à l'utilisateur
@@ -120,8 +129,8 @@ Content-Length: 39
 Ce genre de configuration diffère souvent entre les répertoires. Il y a de grandes chances qu'un répertoire qui reçoit des fichiers uploadés sera configuré pour avoir des contrôles plus strictes qu'à d'autres localisations du système de fichiers qui seront considérés comme en dehors de la portée des fichiers fournies par l'utilisateurs.
 
 
-**Tips**:
-- Les serveurs web utilisent souvent le champ **filename** dans les requêtes `multipart/form-data` pour déterminer le nom et la localisation pour sauvegarder le fichier.
+>**Tips**:
+>- Les serveurs web utilisent souvent le champ **filename** dans les requêtes `multipart/form-data` pour déterminer le nom et la > localisation pour sauvegarder le fichier.
 
 ### Liste noire des types de fichiers dangereux insuffisante
 Une des manières de se prémunir des scripts malicieux est de créer une blacklist des extensions de fichiers potentiellement dangeureux comme `.php`.
@@ -139,6 +148,7 @@ De nombreux serveurs permettent de créer des configurations propre à un dossie
 - Par exemple, les serveurs `Apache` chargeront une configuration spécifique au répertoire à partir du fichier `.htaccess` s'il existe.
 -  De manière équivalente, les développeurs peuvent configurer des répertoires spécifiques sur les serveurs `IIS` à l'aide d'un fichier `web.config`. 
 Voici un exemple de directive pour permettre de fournir des fichiers JSON aux utilisateurs. 
+
 ```
 <staticContent>
     <mimeMap fileExtension=".json" mimeType="application/json" />
