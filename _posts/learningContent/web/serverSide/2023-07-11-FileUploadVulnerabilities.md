@@ -10,12 +10,31 @@ tag: "Web"
 
 Web shell classique pouvant servir :
 - `<?php echo file_get_contents('/path/to/target/file'); ?>`
-- `<?php echo system($_GET['command']); ?>` pour une requête `GET /example/exploit.php?command=id HTTP/1.1`
+- `<?php echo system($_GET['command']); ?>` pour une requête 
+```http
+GET /example/exploit.php?command=id HTTP/1.1
+```
 
 - Validation défectueuse du type de fichier upload : Modifier le `Content-type` (contient le type `MIME` d'un fichier) d'une partie `Content-Disposition` d'un champ d'entrée pour voir si le serveur fait confiance à ce champ.
 - Essayer de bypass les défenses de type **[répertoires accessible à l'utilisateur](http://127.0.0.1:4000/serveur/FileUploadVulnerabilities/#emp%C3%AAcher-lex%C3%A9cution-de-fichiers-dans-des-r%C3%A9pertoires-accessibles-%C3%A0-lutilisateur)** en appliquant une attaque ***path transversal*** dans le **filename** des requêtes `multipart/form-data` (avec [obfuscation](https://mis0ko.github.io/serveur/directoryTraversal/) si nécessaire).
+- Bypass l'éventuelle [liste noire](https://mis0ko.github.io/serveur/FileUploadVulnerabilities/#remplacer-la-configuration-du-serveur) présente :
+    - Changer la configuration du serveur web (par exemple sous apache, ajouter dans le fichier `.htaccess` la directive suivante permet de mapper l'extension `.l33t` au type MIME executable `application/x-httpd-php`)
+    `AddType application/x-httpd-php .l33t`
+    - Upload un payload avec une extension en `.l33t`, il bypassera la liste noire en place.
+- [Obfusquer](https://mis0ko.github.io/serveur/FileUploadVulnerabilities/#obfusquer-les-entensions-de-fichiers) l'extension du fichier upload pour qu'elle soit mal interprétée. À tester :
+    - sensibilité à la casse (`exploit.pHp`)
+    - caractère de fins (espace, points : `exploit.php.`) 
+    - plusieurs extensions (`exploit.php.jpg`)
+    - Url (double)encoding (`exploit%2Ephp` ou `exploit%252Ephp`)
+    - Ajouter des `;` ou `%00` avant l'extension pour les traitements différents de langage haut/bas niveau  (`exploit.asp;.jpg` ou `exploit.asp%00.jpg`).
+    - Utiliser des caractères unicode multioctets (peuvent se convertir en octets nuls/points après conversion/normalisation unicode) : `xC0 x2E`, `xC4 xAE` ou `xC0 xAE` peut devenir `x2E`.
+    - Bypass les implémentation de défense qui supprime les extension de manière non récursive : `exploit.p.phphp`.
+- Upload des fichiers [polyglot](https://portswigger.net/research/bypassing-csp-using-polyglot-jpegs) (PHP/JPG par exemple) contenant un payload pgp dans les metadata qui sera exécuté.
+```console
+exiftool -Comment="<?php echo 'START ' . file_get_contents('/home/carlos/secret') . ' END'; ?>" <YOUR-INPUT-IMAGE>.jpg -o polyglot.php
+``` 
+- Upload les images dans des requêtes `PUT` (si le serveur est mal configuré).
 
--blacklist config de serveur à reprendre
 
 ## Explication de la vulnérabilité
 Les vulnérabilités d'upload de fichiers consistent en la possibilité d'upload des fichiers dans le système de fichier du serveur web à l'origine de cette fonctionnalité. 
@@ -130,7 +149,7 @@ Ce genre de configuration diffère souvent entre les répertoires. Il y a de gra
 
 
 >**Tips**:
->- Les serveurs web utilisent souvent le champ **filename** dans les requêtes `multipart/form-data` pour déterminer le nom et la > localisation pour sauvegarder le fichier.
+>- Les serveurs web utilisent souvent le champ **filename** dans les requêtes `multipart/form-data` pour déterminer le nom et la localisation pour sauvegarder le fichier.
 
 ### Liste noire des types de fichiers dangereux insuffisante
 Une des manières de se prémunir des scripts malicieux est de créer une blacklist des extensions de fichiers potentiellement dangeureux comme `.php`.
@@ -163,11 +182,12 @@ Comme on a pu le voir précédemment, une blacklist est une mauvaise idée. Dans
 Il faut garder en tête que le **code de validation (d'extension dans notre cas), est indépendant du code qui mappe l'extension de fichier** au type `MIME`.
 A partir de cette hypothèse on peut déduire plusieurs techniques de contournement du code de validation.
 - Si le code de validation est sensible à la casse mais pas le code de mappage, alors utiliser une extension comme `exploit.pHp` pourrait contourner la validation.
+- Ajouter les caractères de fin. Certains composants suppriment ou ignorent les espaces, les points et autres caractères de fin de ligne : exploit.php.
 - Fournir plusieurs extensions. En fonction de la méthode de parsing du nom de fichier, le fichier suivant pourrait être interprété comme une image où un  script : `exploit.php.jpg`
 - Utiliser l'encodage url (ou double encodage) pour les `.` `\` ou `/`. Si la valeur n'est pas décodé lors de la validation mais plus tard du côté serveur, cela permettrait d'upload des fichiers malicieux qui seraient bloqués autrement : `exploit%2Ephp`
 - Ajouter des `;` ou `%00` (octet nul url-encodé) avant l'extension. Si la validation est faite dans un langage haut niveau **(PHP ou java)**, mais le serveur traite le fichier avec des fonctions bas-niveaux **(C/C++)**, cela peut créer des divergences dans ce qui est traité à la fin du nom de fichier. `exploit.asp;.jpg` ou `exploit.asp%00.jpg`.
 - Essayer l'utilisation des **caractères unicode multioctets**, qui peuvent être convertis en octets nuls et en points après la conversion ou la normalisation unicode. Des séquences telles que `xC0 x2E`, `xC4 xAE` ou `xC0 xAE` peuvent être traduites en `x2E` si le nom de fichier est analysé comme une **chaîne UTF-8**, puis converties en **caractères ASCII** avant d'être utilisées dans un chemin d'accès.
-- Si une défenses consistant à supprimer ou à remplacer les extensions dangereuses n'est pas implémenté de manière récursive, alors elle peut être contournée : `exploit.p.phphp`
+- Si une défense consiste à supprimer ou à remplacer les extensions dangereuses n'est pas implémentée de manière récursive, alors elle peut être contournée : `exploit.p.phphp`
 
 
 ### Validation défectueuse de contenu du fichier
@@ -187,7 +207,7 @@ exiftool -Comment="<?php echo 'START ' . file_get_contents('/home/carlos/secret'
 ```
 Puis faire une recherche sur `START` dans la réponse à la requête HTTP.
 
-### Exploiter "race-conditions" (situation de compétition) d'upload de fichiers
+### Exploiter "race-conditions" (situation de compétition) d'upload de fichiers
 
 Les frameworks modernes sont mieux armés contre les types d'attaques que nous avons vu précédemment. Ils n'uplaod pas les fichiers directements vers leur destination prévue dans le système de fichier. Au lieu de cela, ils upload les fichiers dans un répertoire temporaire "bac à sable" d'abord et randomise leurs noms pour éviter d'écraser des fichiers existants. La plupart du temps, un antivirus va scanner le fichier à la recherche de malware.
 
@@ -205,8 +225,8 @@ Cependant, d'autres vulnérabilités peuvent être exploitées.
 Si le fichier upload n'est pas exécuté côté serveur, il peut très bien l'être côté client.
 Par exemple, s'il est possible d'upload un fichier **HTML** ou une image **SVG**, il est possible d'utiliser une balise `<script>` pour créer des payloads d'**XSS stockées**.
 
-Si le fichier upload apparaît sur une page visitée par d'autres utilisateurs, leurs navigateurs exécutera le script quand il essayera d'afficher la page. 
-***A noter qu'en raison des restrictions de `same-origin policy`, ce type d'attaques fonctionnent seulement si le fichier uploadé est fourni avec la même origine que celle vers laquelle elle a été upload***
+Si le fichier upload apparaît sur une page visitée par d'autres utilisateurs, leurs navigateurs exécutera le script quand il essayera d'afficher la page.  
+>A noter qu'en raison des restrictions de `same-origin policy`, ce type d'attaques fonctionnent seulement si le fichier uploadé est fourni avec la même origine que celle vers laquelle elle a été upload
 
 ### Exploitation de vulnérabilités dans le parsing des fichiers uploadés
 
