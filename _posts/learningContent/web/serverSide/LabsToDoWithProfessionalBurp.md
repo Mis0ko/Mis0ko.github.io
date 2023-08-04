@@ -2,7 +2,7 @@
 - Lab: Blind OS command injection with out-of-band data exfiltration
 - Lab: 2FA broken logic
 - Lab: Web shell upload via race condition
-
+- Lab: Blind SSRF with out-of-band detection
 
 
 ## Labs à refaire car intéréssant et/ou galère
@@ -11,3 +11,4 @@
 - Lab: Flawed enforcement of business rules
 - Lab: Infinite money logic flaw
 - Lab: Web shell upload via race condition
+- Lab: Blind SSRF with Shellshock exploitation
