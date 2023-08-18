@@ -12,3 +12,10 @@
 - Lab: Infinite money logic flaw
 - Lab: Web shell upload via race condition
 - Lab: Blind SSRF with Shellshock exploitation
+
+
+
+
+## CheckList en pratique
+## Explication de la vulnérabilité
+## Quels sont les impacts des vulnérabilités ...?
