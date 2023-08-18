@@ -1,5 +1,5 @@
 ---
-title: "Information Disclosure Testing"
+title: "6.Information Disclosure Testing"
 category: "Serveur"
 tag: "Web"
 ---
