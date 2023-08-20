@@ -41,9 +41,34 @@ Par exemple, un site Web de vente au détail peut empêcher les utilisateurs de 
 Des vulnérabilités de "broken access control" existent lorsqu'un utilisateur peut  accéder à une ressource ou effectuer une action à laquelle il n'est pas censé pouvoir accéder.
 
 ## Élévation verticale des privilèges
+Si un utilisateur peut accéder à une fonctionnalité à laquelle il n'est pas autorisé à accéder, il s'agit d'une élévation verticale des privilèges.
 
 ### Fonctionnalité non protégée
+L'élévation verticale des privilèges survient lorsqu'une application n'applique aucune protection sur les fonctionnalités sensibles. Par exemple, une page administrative liée à une page de bienvenue pour les utilisateurs admins, mais qui est disponible à tout utilisateur ayant le lien à cette fonctionnalités.
+
+On retrouve deux exemples classiques :
+- `https://insecure-website.com/admin`
+- `https://insecure-website.com/robots.txt`
+
+Parfois, l'URL de ma page d'administration peut être divulguée à d'autres emplacements, tels que le fichier `robots.txt`.
+D'autres localisations peuvent être sensibles, et révélées par l'attaquant à l'aide d'outils d'énumération comme dirbuster.
+
+  
+Une technique de protection utilisée par des développeurs (à tort), est d'utiliser un lien non conventionnel pour la page d'administration, comme par exemple :
+` https://insecure-website.com/administrator-panel-yb556`
+En tant qu'attaquant, il peut être intéressant de regarder les scripts JS pour voir s'il n'y a pas de traces de ces pages (par exemple, un affichage en fonction des droits de l'utilisateur).
+
 ### Méthodes de contrôle d'accès basées sur des paramètres
+
+Certaines applications déterminent les droits d'accès lors de la connexion, puis stockent ces informations dans un emplacement contrôlable par l'utilisateur, tel qu'un champ masqué, un cookie ou un paramètre de chaîne de requête prédéfini. 
+
+L'application prend des décisions de contrôle d'accès ultérieures en fonction de la valeur soumise.
+par exemple :
+- `https://insecure-website.com/login/home.jsp?admin=true`
+- `https://insecure-website.com/login/home.jsp?role=1`
+
+Cette approche est non sécurisée car un utilisateur peut simplement modifier la valeur et accéder à des fonctionnalités auxquelles il n'est pas autorisé.
+
 ### Contrôle d'accès brisé résultant d'une mauvaise configuration de la plate-forme
 ### Contrôle d'accès brisé résultant de divergences de correspondance d'URL
 
