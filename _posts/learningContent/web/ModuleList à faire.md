@@ -1,16 +1,17 @@
 ##  Server Side
 | Nom module | Cours | Lab |
 | ------- | -------- | -------- |
-| SQL Injection |  |  | 
-| Authentification | manque checklist  | Pas tout | 
-| Directory traversal | X | X | 
-| Command injection | X | X | 
-| Business logic vuln | X | X | 
-| Information disclosure | X | X | 
-| Access control |  |  | 
-| File upload vuln | X | X | 
-| SSRF |  |  | 
-| XXE injection |  |  | 
+| 1.SQL Injection |  |  | 
+| 2.Authentification | manque checklist  | Pas tout | 
+| 3.Directory traversal | X | X | 
+| 4.Command injection | X | X | 
+| 5.Business logic vuln | X | X | 
+| 6.Information disclosure | X | X | 
+| 7.Access control | X | X | 
+| 8.File upload vuln | X | X | 
+| 9.Race conditions |  |  | 
+| 10.SSRF | X | X | 
+| 11.XXE injection |  |  | 
 
 ##  Client Side
 
