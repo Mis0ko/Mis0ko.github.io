@@ -39,3 +39,18 @@
 | JWT attacks |  |  | 
 | Prototype pollution |  |  | 
 | Essential skills |  |  | 
+
+
+
+go pratiquer sur tryhackme
+IDOR
+SQL injection
+XSS
+CSRF
+FILEUPLOAD
+LOGIC VULN
+ACCESS CONTROL
+LFI
+RFI
+SSRF
+xxe

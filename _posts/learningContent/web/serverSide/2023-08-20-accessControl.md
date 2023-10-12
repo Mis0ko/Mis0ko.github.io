@@ -7,7 +7,7 @@ tag: "Web"
 
 
 
-- Trouver la page d'administration du site en essayant :
+- <u>Trouver la page d'administration du site en essayant :</u>
     - `https://insecure-website.com/admin`
     - `https://insecure-website.com/robots.txt`
     - dirbuster
