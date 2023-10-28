@@ -5,27 +5,39 @@ tag: "Web"
 ---
 ## CheckList en pratique
 
+- Trouver l'arborescence du site avec gobuster :   
+`gobuster dir -u http://@IP --wordlist /usr/share/dirb/wordlists/common.txt`
+
+- Trouver et remplacer `IDs` dans les urls, headers et body : `/users/01` &rarr; `/users/02` 
+- Essayer le ***Parameter Pollution**: `users=01` &rarr; `users=01&users=02`
+- Caractères Spéciaux: `/users/01*` ou `/users/*` &rarr; découverte de tous les utilisateurs
+- Essayer des anciennes version d'endpont d'api : `/api/v3/users/01` &rarr; `/api/v1/users/01`
+- Ajouter une extension: `/users/01` &rarr; `/users/02.json`
+- Essayer de changer la casse : 
+- Changer le type de méthode HTTP : `POST` &rarr; `GET, PUT, PATCH, DELETE`, etc.
+- Vérifier si `Referer` ou d'autres headers sont utilisés pour valider les **IDs**:
+`GET /users/02` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&rarr;&nbsp;`GET /users/02`
+`Referer: example.com/users/01`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&rarr;&nbsp;`Referer: example.com/users/02`
+- **IDs chiffrés** : Si certains IDs sont chiffrés, utiliser `hashes.com` ou d'autres outils pour les deviner.
+- Changer **GUID** avec des IDs numériques ou emails :  
+`/users/1b04c196-89f4-426a-b18b-ed85924ce283` &rarr; `/users/02` ou `/users/a@b.com`
+- Essayer des **GUID** comme `00000000-0000-0000-0000-00000000` et `11111111-1111-1111-1111-11111111`
+- **Enumération de GUID**: Essayer de découvrir des GUIDS en utilisant `Google Dorks`, `Github`, `Wayback`, `Burp history`
+- **403/401 Bypass**: Si le serveur répond avec des 403/401, essayer burp intruder avec 50-100 requêtes avec des Ids différents. Exemple : `/users/01` &rarr; `/users/100`
+- Si le serveur répond avec un **403/401**, vérifier 2 fois dans l'application. Il arriv que l'action soit performé mais que l serveur renvoie 401/403.
+- **Blind IDORs**: Parfois, l'information n'est pas directement visible. Regarder les endpoints et fonctionnalités qui pourrait contenir des informations comme les fichiers d'export, emails ou message d'alerte.
+- Utiliser IDOR avec XSS pour Account Takeover.
 
 
-- <u>Trouver la page d'administration du site en essayant :</u>
-    - `https://insecure-website.com/admin`
-    - `https://insecure-website.com/robots.txt`
-    - dirbuster
-    - de regarder les scripts JS du site
-- Contrôle d'accès basées sur des paramètres
-    - Être attentif aux URL laissant entendre qu'un contrôle d'accès est opéré, tels que `https://insecure-website.com/login/home.jsp?admin=true&role=1`  
-    Penser aux :
-        - Valeurs prédictibles (entier comme identifiant, ...)
-        - Valeurs non-prédictibles utilisées de manière similaire (**GUIDs**, ...), récupérables ailleurs sur le site.
-        - Redirect de ressources vers une page de connection 
-        &rarr; regarder la réponse de la requête (body) qui peut contenir des informations sensitives.
 
-    - Regarder les paramètres QS/POST ainsi que la réponse de la requête qui peut donner un indice sur la façon dont sont utilisés ces paramètres.
-- Broken access control résultant d'une mauvaise configuration de la plate-forme.   
-Des applications limitent des méthodes HTTP à des utilisateurs sur des liens précis comme `DENY: POST, /admin/deleteUser, managers`
-    - Utiliser `X-Original-URL` ou `X-Rewrite-URL` pour remplacer l'URL de la requête d'origine
-    - Changer le type de méthode HTTP :   
-    click droit &rarr; Change request method (ne pas oublier le cookie de session).
+
+A FINIR
+
+
+- Redirect de ressources vers une page de connection 
+&rarr; regarder la réponse de la requête (body) qui peut contenir des informations sensitives.
+- Utiliser `X-Original-URL` ou `X-Rewrite-URL` pour remplacer l'URL de la requête d'origine
+- Changer le type de méthode HTTP : `POST` &rarr; `GET, PUT, PATCH, DELETE`, etc.
 - Broken access control résultant de divergences de correspondance d'URL  
     - la casse des caractères du path
     - les extensions de fichiers (`/admin/deleteUser` et `/deleteUser.anything`)
@@ -86,8 +98,8 @@ Parfois, l'URL de ma page d'administration peut être divulguée à d'autres emp
 D'autres localisations peuvent être sensibles, et révélées par l'attaquant à l'aide d'outils d'énumération comme dirbuster.
 
   
-Une technique de protection utilisée par des développeurs (à tort), est d'utiliser un lien non conventionnel pour la page d'administration, comme par exemple :
-` https://insecure-website.com/administrator-panel-yb556`
+Une technique de protection utilisée par des développeurs (à tort), est d'utiliser un lien non conventionnel pour la page d'administration, comme par exemple :  
+`https://insecure-website.com/administrator-panel-yb556`  
 En tant qu'attaquant, il peut être intéressant de regarder les scripts JS pour voir s'il n'y a pas de traces de ces pages (par exemple, un affichage en fonction des droits de l'utilisateur).
 
 ### Méthodes de contrôle d'accès basées sur des paramètres
