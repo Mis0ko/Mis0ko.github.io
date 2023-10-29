@@ -60,7 +60,7 @@ Après avoir fait une requête `POST` sur `/api/v1/invite/generate`, on obtient 
 echo VllKNUwtOFYwOFctWUExRzktS0xYTjI= | base64 -d
 ```
 
-# connection au site web
+# Connection au site web
 Une fois connecté à ce qui s'apparente à un ancien site de hackthebox, on cherche dans le site et on tombe sur la génération d'un fichier VPN pour se connecter à distance aux boxes.
 On voit grâce à Burp que la génération du fichier vpn est obtenu grâce à l'appel d'une API `/api/v1/user/vpn/generate`.
 Suite à celui, on investigue un peu l'api en cherchant à appeler les premières étapes du chemin 
