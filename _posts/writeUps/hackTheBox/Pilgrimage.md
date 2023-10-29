@@ -3,6 +3,10 @@ title:  "HacktheBox WriteUp : Pilgrimage"
 category: HackTheBox
 tag: writeups
 ---
+### Skills
+- Nmap
+- gobuster
+-
 
 ### Scanner le réseau
 
@@ -12,7 +16,6 @@ On voit qu'il y a le port 22 et 80 d'ouvert. On énumère un peu plus.
 
 
 ```console
-┌──(misoko㉿kali)-[~]
 └─$ nmap -n -p22,80 -sV -sC 10.10.11.219
 Starting Nmap 7.92 ( https://nmap.org ) at 2023-10-29 10:52 CET
 Nmap scan report for 10.10.11.219
@@ -38,7 +41,6 @@ echo "10.10.11.219 pilgrimage.htb" | sudo tee -a /etc/hosts
 
 On visite le site web, et pendant ce temps là on énumère sur le nom de domaine :
 ```console
-┌──(misoko㉿kali)-[~]
 └─$ gobuster dir -u http://pilgrimage.htb/ --wordlist /usr/share/dirb/wordlists/common.txt
 
 ...
@@ -133,9 +135,10 @@ Côté victime (emily), on va récupérer l'image qui contient l'exploit, et la 
 emily@pilgrimage:/tmp$ cp AAAExploit.png /var/www/pilgrimage.htb/shrunk/
 ```
 
+On obtient un shell root, ce qui nous donne accès au flag.
 
 ## Ref
 - [git-dumper](https://github.com/arthaud/git-dumper?source=post_page-----9e070a99ac40--------------------------------)
 - [Image Magick exploit](https://www.exploit-db.com/exploits/51261)
-- [POC Image Magick 7.1.0 ](https://github.com/voidz0r/CVE-2022-44268)
-- [binwalk](https://www.exploit-db.com/exploits/51249)
+- [POC Image Magick 7.1.0](https://github.com/voidz0r/CVE-2022-44268)
+- [binwalk Exploit](https://www.exploit-db.com/exploits/51249)
