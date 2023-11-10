@@ -9,8 +9,8 @@ tag: "Web"
 `gobuster dir -u http://@IP --wordlist /usr/share/dirb/wordlists/common.txt`
 
 - Trouver et remplacer `IDs` dans les urls, headers et body : `/users/01` &rarr; `/users/02` 
-- Essayer le ***Parameter Pollution**: `users=01` &rarr; `users=01&users=02`
-- Caractères Spéciaux: `/users/01*` ou `/users/*` &rarr; découverte de tous les utilisateurs
+- Essayer le **Parameter Pollution**: `users=01` &rarr; `users=01&users=02`
+- Caractères Spéciaux: `/users/01*` ou `/users/*` (%, _, ., etc) &rarr; découverte de tous les utilisateurs
 - Essayer des anciennes version d'endpont d'api : `/api/v3/users/01` &rarr; `/api/v1/users/01`
 - Ajouter une extension: `/users/01` &rarr; `/users/02.json`
 - Essayer de changer la casse : 
@@ -26,6 +26,8 @@ tag: "Web"
 - **403/401 Bypass**: Si le serveur répond avec des 403/401, essayer burp intruder avec 50-100 requêtes avec des Ids différents. Exemple : `/users/01` &rarr; `/users/100`
 - Si le serveur répond avec un **403/401**, vérifier 2 fois dans l'application. Il arriv que l'action soit performé mais que l serveur renvoie 401/403.
 - **Blind IDORs**: Parfois, l'information n'est pas directement visible. Regarder les endpoints et fonctionnalités qui pourrait contenir des informations comme les fichiers d'export, emails ou message d'alerte.
+- Changer le `Content-type`: XML → JSON
+- Transformer les valeurs numériques en tableau : {"id":19} → {"id":[19]}
 - Utiliser IDOR avec XSS pour Account Takeover.
 
 

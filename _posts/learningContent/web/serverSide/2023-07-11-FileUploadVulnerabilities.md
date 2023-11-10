@@ -16,25 +16,55 @@ GET /example/exploit.php?command=id HTTP/1.1
 ```
 
 - Validation défectueuse du type de fichier upload : Modifier le `Content-type` (contient le type `MIME` d'un fichier) d'une partie `Content-Disposition` d'un champ d'entrée pour voir si le serveur fait confiance à ce champ.
-- Essayer de bypass les défenses de type **[répertoires accessible à l'utilisateur](http://127.0.0.1:4000/serveur/FileUploadVulnerabilities/#emp%C3%AAcher-lex%C3%A9cution-de-fichiers-dans-des-r%C3%A9pertoires-accessibles-%C3%A0-lutilisateur)** en appliquant une attaque ***path transversal*** dans le **filename** des requêtes `multipart/form-data` (avec [obfuscation](https://mis0ko.github.io/serveur/directoryTraversal/) si nécessaire).
+- Essayer de bypass les défenses de type **[sécurisation de répertoires accessible à l'utilisateur](https://mis0ko.github.io/serveur/FileUploadVulnerabilities/#emp%C3%AAcher-lex%C3%A9cution-de-fichiers-dans-des-r%C3%A9pertoires-accessibles-%C3%A0-lutilisateur)** : Faire un  ***path transversal*** dans le **filename** des requêtes `multipart/form-data` pour sortir du (avec [obfuscation](https://mis0ko.github.io/serveur/directoryTraversal/) si nécessaire).
 - Bypass l'éventuelle [liste noire](https://mis0ko.github.io/serveur/FileUploadVulnerabilities/#remplacer-la-configuration-du-serveur) présente :
+    - [Obfusquer](https://mis0ko.github.io/serveur/FileUploadVulnerabilities/#obfusquer-les-entensions-de-fichiers) l'extension du fichier upload pour qu'elle soit mal interprétée. À tester :
+        - sensibilité à la casse (`exploit.pHp`)
+        - caractère de fins (espace, points : `exploit.php.`) 
+        - plusieurs extensions (`exploit.php.jpg`)
+        - Url (double)encoding (`exploit%2Ephp` ou `exploit%252Ephp`)
+        - Ajouter des `;` ou `%00` avant l'extension pour les traitements différents de langage haut/bas niveau  (`exploit.asp;.jpg` ou `exploit.asp%00.jpg`).
+        - Utiliser des caractères unicode multioctets (peuvent se convertir en octets nuls/points après conversion/normalisation unicode) : `xC0 x2E`, `xC4 xAE` ou `xC0 xAE` peut devenir `x2E`.
+        - Bypass les implémentation de défense qui supprime les extension de manière non récursive : `exploit.p.phphp`.
     - Changer la configuration du serveur web (par exemple sous apache, ajouter dans le fichier `.htaccess` la directive suivante permet de mapper l'extension `.l33t` au type MIME executable `application/x-httpd-php`)
     `AddType application/x-httpd-php .l33t`
     - Upload un payload avec une extension en `.l33t`, il bypassera la liste noire en place.
-- [Obfusquer](https://mis0ko.github.io/serveur/FileUploadVulnerabilities/#obfusquer-les-entensions-de-fichiers) l'extension du fichier upload pour qu'elle soit mal interprétée. À tester :
-    - sensibilité à la casse (`exploit.pHp`)
-    - caractère de fins (espace, points : `exploit.php.`) 
-    - plusieurs extensions (`exploit.php.jpg`)
-    - Url (double)encoding (`exploit%2Ephp` ou `exploit%252Ephp`)
-    - Ajouter des `;` ou `%00` avant l'extension pour les traitements différents de langage haut/bas niveau  (`exploit.asp;.jpg` ou `exploit.asp%00.jpg`).
-    - Utiliser des caractères unicode multioctets (peuvent se convertir en octets nuls/points après conversion/normalisation unicode) : `xC0 x2E`, `xC4 xAE` ou `xC0 xAE` peut devenir `x2E`.
-    - Bypass les implémentation de défense qui supprime les extension de manière non récursive : `exploit.p.phphp`.
+
+- Filename Injection : souvent réfléchis/manipulés (XSS, SQLi, LDAP/Command, SSRF).
+    - XSS et CommandInjection dans le filename.
+    - Paths : Absolute/relative/UNC
+    - SSRF : payload de ssrf (https://...) + essayer de changer le type ="file" ou type="url" + burp collaborator payload
+- Client-Side Script : [svg-cheatsheet](https://github.com/allanlw/svg-cheatsheet) + couplé avec magic number : <img src="/assets/images/web/fileUpload/storedXSSFileUpload.png" width="300px" height="150px" style="display: block; margin: 0 auto"/>
+    - [svg+xxe ou svg+openRedirect](https://www.linkedin.com/posts/jeffreyrdoty_saintcon2023-fileupload-activity-7124789096207552512-ky-1?utm_source=share&utm_medium=member_desktop)
+    - [PDF Malicieux](https://github.com/jonaslejon/malicious-pdf) (script pour tester payload ) + [hacknTricks](https://book.hacktricks.xyz/pentesting-web/xss-cross-site-scripting/pdf-injection) (pas eu le temps de regarder).
+- RCE :
+    - Trouver le path du fichier
+        - proxy, click droit sur l'image + voir image, code source (si dispo)
+    - Regarder/Générer les messages d'erreurs
+        - filename long, caractères interdits, filename dupliqués, 2 filename
+    - requête `PUT` non restreinte (+ supprimer les cookies et voir si ça fonctionne).
+    - Path transversal :
+        - upload et remplacer des fichiers de configuration(voir pdf + payloadAlltheThing)
+            - Apache: .htaccess 
+            - ASP.NET : web.config
+            - .ssh/authorized_keys
+- Evasion de Défense:
+    - Manipulation de `Content-type`. Changer la valeur du Content-type :
+        - MIME-type autorisé + extension non autorisée
+        - MIME-type non-autorisé + extension autorisée 
+        - Enlever le Content-type
+        - Envoyer le `Content-type` 2 fois dans la requête avec un `Mime-types` autorisé et non-autorisé 
+        - filename="file.png";filename="file.svg"
+- Upload de fichier contenant des XSS si le fichier est visible ailleurs sur le site.
+&rarr; Il peut y avoir les fichiers HTML, DOCX, etc
 - Upload des fichiers [polyglot](https://portswigger.net/research/bypassing-csp-using-polyglot-jpegs) (PHP/JPG par exemple) contenant un payload pgp dans les metadata qui sera exécuté.
 ```console
 exiftool -Comment="<?php echo 'START ' . file_get_contents('/home/carlos/secret') . ' END'; ?>" <YOUR-INPUT-IMAGE>.jpg -o polyglot.php
 ``` 
-- Upload les images dans des requêtes `PUT` (si le serveur est mal configuré).
-
+### Reférence intéressante :
+- [magic numbers des fichiers connus](https://en.wikipedia.org/wiki/List_of_file_signatures)
+- [extension Burp pour fuzzer](https://github.com/JonCooperWorks/burp-filefuzzer)
+- [PayloadAllThething cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Upload%20Insecure%20Files/README.md#defaults-extensions)
 
 ## Explication de la vulnérabilité
 Les vulnérabilités d'upload de fichiers consistent en la possibilité d'upload des fichiers dans le système de fichier du serveur web à l'origine de cette fonctionnalité. 
@@ -199,7 +229,7 @@ Ce type de validation se fait en vérifiant des caractéristiques intrinsèques 
 Également, certains types de fichiers contiennent une séquence d'octet spécifique dans leurs headers ou footers, qui peut être utiliser comme signature d'un type de fichier.
 Par exemple, les JPEG commencent toujours par les octets `FF D8 FF`.
 
-Des outils comme `ExifTool` peuvent être utilisés pour créer des fichiers polyglotte contenant du code malveillant dans ses métadonnées.
+Des outils comme `ExifTool` peuvent être utilisés pour créer des fichiers polyglote contenant du code malveillant dans ses métadonnées.
 
 #### Méthode pour créer un script dans une image 
 ```console
